@@ -7,11 +7,11 @@ export const statsAPI = createApi({
     tagTypes: ['stats'],
     endpoints: (build) => ({
         getGeneralStats: build.query<Types.StatisticsResponse, void>({
-            query: () => '/get_gen_stats',
+            query: () => '/stats/general',
             providesTags: ['stats']
         }),
         getPersonalStats: build.query<any, void>({
-            query: () => '/get_pers_stats',
+            query: () => '/users/me',
             providesTags: ['stats']
         }),
     }),

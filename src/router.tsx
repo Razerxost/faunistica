@@ -2,11 +2,10 @@ import {
     createBrowserRouter,
     Navigate,
     Outlet,
-    useLocation,
-    useMatches,
+    redirect,
     useNavigation,
 } from 'react-router';
-import { useAppSelector } from './store/store';
+import { store } from './store/store';
 import Spinner from './components/Spinner';
 import Layout from './layouts/Layout';
 
@@ -19,35 +18,32 @@ import Instructions from './pages/Instructions';
 import Statistics from './pages/Statistics';
 import Support from './pages/Support';
 
-function RouteAccessGate() {
-    const { auth, isLoading } = useAppSelector((state) => state.user);
+function NavigationWrapper() {
     const navigation = useNavigation();
-    const location = useLocation();
-    const matches = useMatches();
+    const isNavigating = Boolean(navigation.location);
 
-    const isAuthRoute = matches.some(
-        (m) => (m.handle as { authOnly?: boolean; guestOnly?: boolean })?.authOnly
-    );
-    const isGuestRoute = matches.some(
-        (m) => (m.handle as { authOnly?: boolean; guestOnly?: boolean })?.guestOnly
-    );
-    const isPending = navigation.state !== 'idle';
-
-    // TODO: так не надо, переделать!
-    if (isLoading || isPending) {
+    if (isNavigating) {
         return <Spinner />;
-    }
-
-    if (isAuthRoute && !auth) {
-        return <Navigate to="/auth/login" state={{ from: location }} replace />;
-    }
-
-    if (isGuestRoute && auth) {
-        return <Navigate to="/articles" replace />;
     }
 
     return <Outlet />;
 }
+
+const requireAuth = () => {
+    const { auth } = store.getState().user;
+    if (!auth) {
+        return redirect('/auth/login');
+    }
+    return null;
+};
+
+const requireGuest = () => {
+    const { auth } = store.getState().user;
+    if (auth) {
+        return redirect('/articles');
+    }
+    return null;
+};
 
 export const router = createBrowserRouter([
     {
@@ -55,21 +51,20 @@ export const router = createBrowserRouter([
         element: <Layout />,
         children: [
             {
-                element: <RouteAccessGate />,
+                element: <NavigationWrapper />,
                 children: [
                     {
                         index: true,
-                        handle: { guestOnly: true },
+                        loader: requireGuest,
                         element: <Landing />
                     },
 
                     {
                         path: 'auth',
-                        handle: { guestOnly: true },
+                        loader: requireGuest,
                         children: [
                             {
                                 index: true,
-                                handle: { guestOnly: true },
                                 element: <Navigate to="/auth/login" replace />
                             },
                             { path: 'login', element: <Login /> },
@@ -78,7 +73,7 @@ export const router = createBrowserRouter([
                     },
 
                     {
-                        handle: { authOnly: true },
+                        loader: requireAuth,
                         children: [
                             { path: 'articles', element: <Articles /> },
                             { path: 'article/:id', element: <FormFilling /> },

@@ -8,21 +8,20 @@ export const recordAPI = createApi({
     endpoints: (build) => ({
         getRecordsData: build.query<any, void>({
             query: () => ({
-                url: '/get_records_data',
-                method: 'POST',
+                url: '/records/',
+                method: 'GET',
             }),
             providesTags: ['record']
         }),
-        getRecordByHash: build.mutation<Types.GetRecordResponse, Types.RecordHashRequest>({
+        getRecordByHash: build.query<Types.GetRecordResponse, Types.RecordHashRequest>({
             query: (payload) => ({
-                url: '/get_record',
-                method: 'POST',
-                body: payload,
+                url: `/records/${payload.hash}`,
+                method: 'GET',
             }),
         }),
         insertRecord: build.mutation<void, Types.InsertRecordsRequest>({
             query: (record) => ({
-                url: '/insert_record',
+                url: '/records/',
                 method: 'POST',
                 body: record,
             }),
@@ -30,17 +29,16 @@ export const recordAPI = createApi({
         }),
         editRecord: build.mutation<void, Types.EditRecordRequest>({
             query: (record) => ({
-                url: '/edit_record',
-                method: 'POST',
+                url: `/records/${record.hash}`,
+                method: 'PUT',
                 body: record,
             }),
             invalidatesTags: ['record']
         }),
         deleteRecord: build.mutation<void, Types.RecordHashRequest>({
             query: (payload) => ({
-                url: '/del_record',
-                method: 'POST',
-                body: payload,
+                url: `/records/${payload.hash}`,
+                method: 'DELETE',
             }),
             invalidatesTags: ['record']
         }),

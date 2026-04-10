@@ -9,7 +9,7 @@ export const authAPI = createApi({
     endpoints: (build) => ({
         login: build.mutation<void, Types.UserRequest>({
             query: (credentials) => ({
-                url: '/get_user',
+                url: '/auth/login',
                 method: 'POST',
                 body: credentials,
             }),
@@ -25,19 +25,19 @@ export const authAPI = createApi({
         }),
         refreshToken: build.mutation<void, void>({
             query: () => ({
-                url: '/refresh_token',
+                url: '/auth/refresh',
                 method: 'POST',
             }),
         }),
         checkAuth: build.query<void, void>({
             query: () => ({
-                url: '/check_auth',
+                url: '/auth/check',
                 method: 'POST',
             }),
         }),
         logout: build.mutation<void, void>({
             query: () => ({
-                url: '/logout',
+                url: '/auth/logout',
                 method: 'POST',
             }),
             invalidatesTags: ['auth']

@@ -16,7 +16,7 @@ const rootReducer = combineReducers({
     [utilAPI.reducerPath]: utilAPI.reducer,
 })
 
-export const setupStore = () => configureStore({
+export const store = configureStore({
     reducer: rootReducer,
     middleware: (getDefaultMiddleware) =>
         getDefaultMiddleware().concat(
@@ -29,7 +29,7 @@ export const setupStore = () => configureStore({
 })
 
 export type RootState = ReturnType<typeof rootReducer>
-export type AppStore = ReturnType<typeof setupStore>
+export type AppStore = typeof store
 
 export const useAppDispatch = () => useDispatch<AppStore['dispatch']>();
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;

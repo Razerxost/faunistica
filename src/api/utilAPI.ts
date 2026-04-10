@@ -8,21 +8,21 @@ export const utilAPI = createApi({
     endpoints: (build) => ({
         suggestTaxon: build.mutation<Types.SuggestTaxonResponse, Types.SuggestTaxonRequest>({
             query: (payload) => ({
-                url: '/suggest_taxon',
+                url: '/taxonomy/suggest',
                 method: 'POST',
                 body: payload,
             }),
         }),
         autofillTaxon: build.mutation<Types.AutofillTaxonResponse, Types.AutofillTaxonRequest>({
             query: (payload) => ({
-                url: '/autofill_taxon',
+                url: '/taxonomy/autofill',
                 method: 'POST',
                 body: payload,
             }),
         }),
         geoSearch: build.mutation<Types.SuggestTaxonResponse, Types.GeoSearchRequest>({
             query: (payload) => ({
-                url: '/geo_search',
+                url: '/geo/search',
                 method: 'POST',
                 body: payload,
             }),
@@ -36,14 +36,14 @@ export const utilAPI = createApi({
         }),
         getLocationByCoords: build.mutation<Types.GetLocationResponse, Types.GetLocationRequest>({
             query: (payload) => ({
-                url: '/get_loc',
+                url: '/geo/reverse-geocode',
                 method: 'POST',
                 body: payload,
             }),
         }),
         getUserPhoto: build.query<any, number>({
             query: (userId) => ({
-                url: '/user_photo',
+                url: '/users/me/photo',
                 params: { user_id: userId }
             }),
         }),

@@ -7,14 +7,14 @@ export const publAPI = createApi({
     tagTypes: ['publ'],
     endpoints: (build) => ({
         getPublications: build.query<any, void>({
-            query: () => '/get_publ',
+            query: () => '/users/publication',
         }),
         getNextPublication: build.query<any, void>({
-            query: () => '/next_publ',
+            query: () => '/users/publication/next',
         }),
-        getPublicationFromHash: build.mutation<any, Types.RecordHashRequest>({
+        getPublicationFromHash: build.query<any, Types.RecordHashRequest>({
             query: (payload) => ({
-                url: '/publ_from_hash',
+                url: '/users/from-hash',
                 method: 'POST',
                 body: payload,
             }),
