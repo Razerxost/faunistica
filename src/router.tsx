@@ -10,9 +10,12 @@ import Spinner from './components/Spinner';
 import Layout from './layouts/Layout';
 
 import Landing from './pages/Landing';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Articles from './pages/Articles';
+import AuthLayout from './pages/Auth';
+import Login from './pages/Auth/Login';
+import Register from './pages/Auth/Register';
+import TelegramAuth from './pages/Auth/Telegram';
+import Recovery from './pages/Auth/Recovery';
+import Dashboard from './pages/Dashboard';
 import FormFilling from './pages/FormFilling';
 import Instructions from './pages/Instructions';
 import Statistics from './pages/Statistics';
@@ -40,7 +43,7 @@ const requireAuth = () => {
 const requireGuest = () => {
     const { auth } = store.getState().user;
     if (auth) {
-        return redirect('/articles');
+        return redirect('/dashboard');
     }
     return null;
 };
@@ -62,20 +65,20 @@ export const router = createBrowserRouter([
                     {
                         path: 'auth',
                         loader: requireGuest,
+                        element: <AuthLayout />,
                         children: [
-                            {
-                                index: true,
-                                element: <Navigate to="/auth/login" replace />
-                            },
+                            { index: true, element: <Navigate to="login" replace /> },
                             { path: 'login', element: <Login /> },
                             { path: 'register', element: <Register /> },
-                        ],
+                            { path: 'telegram', element: <TelegramAuth /> },
+                            { path: 'recovery', element: <Recovery /> },
+                        ]
                     },
 
                     {
                         loader: requireAuth,
                         children: [
-                            { path: 'articles', element: <Articles /> },
+                            { path: 'dashboard', element: <Dashboard /> },
                             { path: 'article/:id', element: <FormFilling /> },
                             { path: 'instructions', element: <Instructions /> },
                             { path: 'support', element: <Support /> },

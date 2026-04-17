@@ -1,11 +1,20 @@
-import type { FC } from "react";
+import { type FC } from "react";
+import ArticleSourceCard from "@/components/forms/ArticleSourceCard";
+import QuantitiesCard from "@/components/forms/QuantitiesCard";
+import TaxonomyCard from "@/components/forms/TaxonomyCard";
+import CollectionEventCard from "@/components/forms/CollectionEventCard";
+import GeographyCard from "@/components/forms/GeographyCard";
 
 const FormFilling: FC = () => {
     return (
-        <>
-            <h1>FormFilling</h1>
-        </>
-    )
-}
+        <div className="max-w-6xl mx-auto space-y-6">
+            <ArticleSourceCard />
+            <GeographyCard />
+            <QuantitiesCard />
+            <TaxonomyCard />
+            <CollectionEventCard />
+        </div>
+    );
+};
 
-export default FormFilling
+export default FormFilling;
