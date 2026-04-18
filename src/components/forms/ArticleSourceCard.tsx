@@ -3,8 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { FileText } from 'lucide-react';
+import type { InsertRecordsRequest } from "@/types/api.dto";
 
-const ArticleSourceCard: FC = () => {
+interface Props {
+    data?: Partial<InsertRecordsRequest>;
+    updateData?: (updates: Partial<InsertRecordsRequest>) => void;
+}
+
+const ArticleSourceCard: FC<Props> = () => {
     return (
         <Card className="border-slate-300 shadow-sm bg-white relative overflow-hidden">
             <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-slate-800"></div>

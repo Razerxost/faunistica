@@ -7,8 +7,14 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Lock, Map as MapIcon } from 'lucide-react';
+import type { InsertRecordsRequest } from "@/types/api.dto";
 
-const GeographyCard: FC = () => {
+interface Props {
+    data?: Partial<InsertRecordsRequest>;
+    updateData?: (updates: Partial<InsertRecordsRequest>) => void;
+}
+
+const GeographyCard: FC<Props> = ({ data = {}, updateData }) => {
     return (
         <Card className="border-slate-200 shadow-sm relative">
             <Button variant="ghost" size="icon" className="absolute top-4 right-4 text-slate-400 hover:text-slate-900 bg-slate-50">
@@ -45,26 +51,45 @@ const GeographyCard: FC = () => {
                     </div>
                     <div className="space-y-2">
                         <Label>Географические примечания</Label>
-                        <Textarea className="h-28 resize-none" />
+                        <Textarea 
+                            className="h-28 resize-none" 
+                            value={data.geo_REM || ''}
+                            onChange={(e) => updateData?.({ geo_REM: e.target.value })}
+                        />
                     </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div className="space-y-2">
                         <Label>Государство</Label>
-                        <Input defaultValue="Россия" />
+                        <Input 
+                            value={data.country || 'Россия'} 
+                            onChange={(e) => updateData?.({ country: e.target.value })}
+                        />
                     </div>
                     <div className="space-y-2">
                         <Label>Регион (Субъект)</Label>
-                        <Input placeholder="Выберите регион" />
+                        <Input 
+                            placeholder="Выберите регион" 
+                            value={data.region || ''}
+                            onChange={(e) => updateData?.({ region: e.target.value })}
+                        />
                     </div>
                     <div className="space-y-2">
                         <Label>Район (Муниципалитет)</Label>
-                        <Input placeholder="Выберите район" />
+                        <Input 
+                            placeholder="Выберите район" 
+                            value={data.district || ''}
+                            onChange={(e) => updateData?.({ district: e.target.value })}
+                        />
                     </div>
                     <div className="space-y-2">
                         <Label>Локалитет (Топоним)</Label>
-                        <Input placeholder="Точное место сбора" />
+                        <Input 
+                            placeholder="Точное место сбора" 
+                            value={data.place || ''}
+                            onChange={(e) => updateData?.({ place: e.target.value })}
+                        />
                     </div>
                 </div>
 

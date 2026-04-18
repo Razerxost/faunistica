@@ -6,8 +6,14 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Lock } from 'lucide-react';
+import type { InsertRecordsRequest } from "@/types/api.dto";
 
-const CollectionEventCard: FC = () => {
+interface Props {
+    data?: Partial<InsertRecordsRequest>;
+    updateData?: (updates: Partial<InsertRecordsRequest>) => void;
+}
+
+const CollectionEventCard: FC<Props> = ({ data = {}, updateData }) => {
     const [dateRange, setDateRange] = useState(false);
 
     return (
@@ -57,11 +63,19 @@ const CollectionEventCard: FC = () => {
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label>Биотоп</Label>
-                                <Input placeholder="Описание местообитания" />
+                                <Input 
+                                    placeholder="Описание местообитания" 
+                                    value={data.biotope || ''}
+                                    onChange={(e) => updateData?.({ biotope: e.target.value })}
+                                />
                             </div>
                             <div className="space-y-2">
                                 <Label>Коллектор</Label>
-                                <Input placeholder="Фамилия И.О." />
+                                <Input 
+                                    placeholder="Фамилия И.О." 
+                                    value={data.collector || ''}
+                                    onChange={(e) => updateData?.({ collector: e.target.value })}
+                                />
                             </div>
                         </div>
                     </div>
@@ -70,7 +84,10 @@ const CollectionEventCard: FC = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
                                 <Label>Единицы измерения</Label>
-                                <Input defaultValue="особи, шт." />
+                                <Input 
+                                    value={data.measurement_units || 'особи, шт.'} 
+                                    onChange={(e) => updateData?.({ measurement_units: e.target.value })}
+                                />
                             </div>
                             <div className="space-y-2">
                                 <Label>Выборочное усилие</Label>
@@ -79,7 +96,12 @@ const CollectionEventCard: FC = () => {
                         </div>
                         <div className="space-y-2 h-full">
                             <Label>Примечания к событию</Label>
-                            <Textarea className="h-32 resize-none" placeholder="Методика сбора, погодные условия и т.д." />
+                            <Textarea 
+                                className="h-32 resize-none" 
+                                placeholder="Методика сбора, погодные условия и т.д." 
+                                value={data.eve_REM || ''}
+                                onChange={(e) => updateData?.({ eve_REM: e.target.value })}
+                            />
                         </div>
                     </div>
                 </div>

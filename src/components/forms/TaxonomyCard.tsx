@@ -1,4 +1,4 @@
-import { type FC, useState } from "react";
+import { type FC } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -7,9 +7,16 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Lock } from 'lucide-react';
+import type { InsertRecordsRequest } from "@/types/api.dto";
 
-const TaxonomyCard: FC = () => {
-    const [isNewSpecies, setIsNewSpecies] = useState(false);
+interface Props {
+    data?: Partial<InsertRecordsRequest>;
+    updateData?: (updates: Partial<InsertRecordsRequest>) => void;
+}
+
+const TaxonomyCard: FC<Props> = ({ data = {}, updateData }) => {
+    const isNewSpecies = data.is_new_species || false;
+    const setIsNewSpecies = (val: boolean) => updateData?.({ is_new_species: val });
 
     return (
         <Card className="border-slate-200 shadow-sm relative">
@@ -34,15 +41,27 @@ const TaxonomyCard: FC = () => {
                     </div>
                     <div className="space-y-2">
                         <Label>Род (Genus)</Label>
-                        <Input placeholder="Название рода" />
+                        <Input
+                            placeholder="Название рода"
+                            value={data.genus || ''}
+                            onChange={(e) => updateData?.({ genus: e.target.value })}
+                        />
                     </div>
                     <div className="space-y-2">
                         <Label>Вид (Species)</Label>
-                        <Input placeholder="Видовой эпитет" />
+                        <Input
+                            placeholder="Видовой эпитет"
+                            value={data.species || ''}
+                            onChange={(e) => updateData?.({ species: e.target.value })}
+                        />
                     </div>
                     <div className="space-y-2">
                         <Label>Таксономические примечания</Label>
-                        <Textarea className="min-h-[40px] resize-none" />
+                        <Textarea
+                            className="min-h-[40px] resize-none"
+                            value={data.taxonomic_notes || ''}
+                            onChange={(e) => updateData?.({ taxonomic_notes: e.target.value })}
+                        />
                     </div>
                 </div>
 

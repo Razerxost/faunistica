@@ -1,8 +1,7 @@
 import { type FC, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from 'lucide-react';
-import { Badge } from "@/components/ui/badge";
-import { useLocation, useNavigate } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 
 interface HeaderProps {
     isSidebarEnabled?: boolean;
@@ -57,17 +56,15 @@ const Header: FC<HeaderProps> = ({ isSidebarEnabled, setSidebarOpen }) => {
                         </>
                     ) : (
                         <>
-                            <a href="#" className="hover:text-slate-900 transition-colors">Инструкция</a>
-                            <a href="#" className="hover:text-slate-900 transition-colors">Статистика</a>
-                            <a href="#" className="hover:text-slate-900 transition-colors">Поддержка</a>
+                            <Link to="/dashboard" className="hover:text-slate-900 transition-colors">Публикации</Link>
+                            <Link to="/instructions" className="hover:text-slate-900 transition-colors">Инструкция</Link>
+                            <Link to="/statistics" className="hover:text-slate-900 transition-colors">Статистика</Link>
+                            <Link to="/support" className="hover:text-slate-900 transition-colors">Поддержка</Link>
                         </>
                     )}
                 </nav>
 
                 <div className="flex items-center gap-3">
-                    {isSidebarEnabled && (
-                        <Badge variant="outline" className="hidden sm:inline-flex bg-slate-50">В сети</Badge>
-                    )}
                     {!isLanding ? (
                         <div className="h-9 w-9 rounded-full bg-slate-900 flex items-center justify-center text-xs font-bold text-white shadow-sm cursor-pointer hover:bg-slate-800 transition-transform hover:scale-105">
                             ГА
@@ -92,9 +89,10 @@ const Header: FC<HeaderProps> = ({ isSidebarEnabled, setSidebarOpen }) => {
                             </>
                         ) : (
                             <>
-                                <a href="#" className="p-3 hover:bg-slate-50 rounded-md transition-colors" onClick={() => setIsMobileMenuOpen(false)}>Инструкция</a>
-                                <a href="#" className="p-3 hover:bg-slate-50 rounded-md transition-colors" onClick={() => setIsMobileMenuOpen(false)}>Статистика</a>
-                                <a href="#" className="p-3 hover:bg-slate-50 rounded-md transition-colors" onClick={() => setIsMobileMenuOpen(false)}>Поддержка</a>
+                                <Link to="/dashboard" className="p-3 hover:bg-slate-50 rounded-md transition-colors" onClick={() => setIsMobileMenuOpen(false)}>Публикации</Link>
+                                <Link to="/instructions" className="p-3 hover:bg-slate-50 rounded-md transition-colors" onClick={() => setIsMobileMenuOpen(false)}>Инструкция</Link>
+                                <Link to="/statistics" className="p-3 hover:bg-slate-50 rounded-md transition-colors" onClick={() => setIsMobileMenuOpen(false)}>Статистика</Link>
+                                <Link to="/support" className="p-3 hover:bg-slate-50 rounded-md transition-colors" onClick={() => setIsMobileMenuOpen(false)}>Поддержка</Link>
                             </>
                         )}
                     </nav>

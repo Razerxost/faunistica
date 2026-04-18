@@ -4,6 +4,7 @@ import {
     Outlet,
     redirect,
     useNavigation,
+    useOutletContext,
 } from 'react-router';
 import { store } from './store/store';
 import Spinner from './components/Spinner';
@@ -24,12 +25,13 @@ import Support from './pages/Support';
 function NavigationWrapper() {
     const navigation = useNavigation();
     const isNavigating = Boolean(navigation.location);
+    const context = useOutletContext();
 
     if (isNavigating) {
         return <Spinner />;
     }
 
-    return <Outlet />;
+    return <Outlet context={context} />;
 }
 
 const requireAuth = () => {
