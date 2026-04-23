@@ -9,7 +9,7 @@ import { login } from './store/reducers/userSlice.ts'
 import { routes } from './router.tsx'
 import { createBrowserRouter } from 'react-router'
 
-import Spinner from './components/Spinner'
+import LoadingScreen from './components/LoadingScreen.tsx'
 
 import './index.css'
 
@@ -23,7 +23,7 @@ import './index.css'
  */
 async function initAuth() {
     try {
-        const response = await fetch('http://localhost:8000/api/auth/check', {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/check`, {
             method: 'POST',
             credentials: 'include',
         });
@@ -35,7 +35,7 @@ async function initAuth() {
 
         // Access token expired — try to refresh
         if (response.status === 401) {
-            const refreshResponse = await fetch('http://localhost:8000/api/auth/refresh', {
+            const refreshResponse = await fetch(`${import.meta.env.VITE_API_URL}/auth/refresh`, {
                 method: 'POST',
                 credentials: 'include',
             });
@@ -63,7 +63,7 @@ const App = () => {
     }, []);
 
     if (isInitializing) {
-        return <Spinner />;
+        return <LoadingScreen />;
     }
 
     return <AppRouter />;

@@ -1,13 +1,13 @@
 import {
-    createBrowserRouter,
     Navigate,
     Outlet,
     redirect,
     useNavigation,
     useOutletContext,
+    type LoaderFunctionArgs
 } from 'react-router';
 import { store } from './store/store';
-import Spinner from './components/Spinner';
+import LoadingScreen from './components/LoadingScreen';
 import Layout from './layouts/Layout';
 
 import Landing from './pages/Landing';
@@ -21,6 +21,8 @@ import FormFilling from './pages/FormFilling';
 import Instructions from './pages/Instructions';
 import Statistics from './pages/Statistics';
 import Support from './pages/Support';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import TermsOfService from './pages/TermsOfService';
 
 function NavigationWrapper() {
     const navigation = useNavigation();
@@ -28,50 +30,67 @@ function NavigationWrapper() {
     const context = useOutletContext();
 
     if (isNavigating) {
-        return <Spinner />;
+        return <LoadingScreen />;
     }
 
     return <Outlet context={context} />;
 }
 
-const requireAuth = () => {
+const requireAuth = ({ request }: LoaderFunctionArgs) => {
     const { auth } = store.getState().user;
-    console.log('[Router] requireAuth check:', { auth });
     if (!auth) {
-        console.log('[Router] Redirecting to login (unauthenticated)');
-        return redirect('/auth/login');
+        const url = new URL(request.url);
+        const redirectTo = url.pathname + url.search;
+        return redirect(`/auth/login?redirectTo=${encodeURIComponent(redirectTo)}`);
     }
     return null;
 };
 
 const requireGuest = () => {
     const { auth } = store.getState().user;
-    console.log('[Router] requireGuest check:', { auth });
     if (auth) {
-        console.log('[Router] Redirecting to dashboard (authenticated)');
         return redirect('/dashboard');
     }
     return null;
 };
 
+interface RouteMeta {
+    isLanding?: boolean;
+    isPublic?: boolean;
+    showFullHeader?: boolean;
+}
+
 export const routes = [
     {
         path: '/',
-        element: <Layout />,
+        element: <NavigationWrapper />,
         children: [
             {
-                element: <NavigationWrapper />,
+                element: <Layout />,
                 children: [
                     {
                         index: true,
                         loader: requireGuest,
-                        element: <Landing />
+                        element: <Landing />,
+                        meta: { isLanding: true, isPublic: true, showFullHeader: false }
+                    },
+
+                    {
+                        path: 'privacy-policy',
+                        element: <PrivacyPolicy />,
+                        meta: { isPublic: true, showFullHeader: false }
+                    },
+                    {
+                        path: 'terms-of-service',
+                        element: <TermsOfService />,
+                        meta: { isPublic: true, showFullHeader: false }
                     },
 
                     {
                         path: 'auth',
                         loader: requireGuest,
                         element: <AuthLayout />,
+                        meta: { isPublic: true, showFullHeader: false },
                         children: [
                             { index: true, element: <Navigate to="login" replace /> },
                             { path: 'login', element: <Login /> },
@@ -83,6 +102,7 @@ export const routes = [
 
                     {
                         loader: requireAuth,
+                        meta: { isPublic: false, showFullHeader: true },
                         children: [
                             { path: 'dashboard', element: <Dashboard /> },
                             { path: 'article/:id', element: <FormFilling /> },
@@ -98,5 +118,3 @@ export const routes = [
         ],
     },
 ];
-
-export const router = createBrowserRouter(routes);
