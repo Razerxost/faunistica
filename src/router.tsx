@@ -4,11 +4,11 @@ import {
     redirect,
     useNavigation,
     useOutletContext,
-    type LoaderFunctionArgs
+    type LoaderFunctionArgs, type RouteObject
 } from 'react-router';
 import { store } from './store/store';
 import LoadingScreen from './components/LoadingScreen';
-import Layout from './layouts/Layout';
+import Layout from './layout/Layout';
 
 import Landing from './pages/Landing';
 import AuthLayout from './pages/Auth';
@@ -46,21 +46,17 @@ const requireAuth = ({ request }: LoaderFunctionArgs) => {
     return null;
 };
 
-const requireGuest = () => {
+const requireGuest = ({ request }: LoaderFunctionArgs) => {
     const { auth } = store.getState().user;
     if (auth) {
-        return redirect('/dashboard');
+        const url = new URL(request.url);
+        const redirectTo = url.searchParams.get('redirectTo');
+        return redirect(redirectTo || '/dashboard');
     }
     return null;
 };
 
-interface RouteMeta {
-    isLanding?: boolean;
-    isPublic?: boolean;
-    showFullHeader?: boolean;
-}
-
-export const routes = [
+export const routes: RouteObject[] = [
     {
         path: '/',
         element: <NavigationWrapper />,
@@ -72,25 +68,23 @@ export const routes = [
                         index: true,
                         loader: requireGuest,
                         element: <Landing />,
-                        meta: { isLanding: true, isPublic: true, showFullHeader: false }
+                        handle: { isLanding: true, isNavigateEnabled: true }
                     },
 
                     {
                         path: 'privacy-policy',
-                        element: <PrivacyPolicy />,
-                        meta: { isPublic: true, showFullHeader: false }
+                        element: <PrivacyPolicy />
                     },
+
                     {
                         path: 'terms-of-service',
-                        element: <TermsOfService />,
-                        meta: { isPublic: true, showFullHeader: false }
+                        element: <TermsOfService />
                     },
 
                     {
                         path: 'auth',
                         loader: requireGuest,
                         element: <AuthLayout />,
-                        meta: { isPublic: true, showFullHeader: false },
                         children: [
                             { index: true, element: <Navigate to="login" replace /> },
                             { path: 'login', element: <Login /> },
@@ -102,10 +96,10 @@ export const routes = [
 
                     {
                         loader: requireAuth,
-                        meta: { isPublic: false, showFullHeader: true },
+                        handle: { isNavigateEnabled: true },
                         children: [
                             { path: 'dashboard', element: <Dashboard /> },
-                            { path: 'article/:id', element: <FormFilling /> },
+                            { path: 'article/:id', element: <FormFilling />, handle: { isNavigateEnabled: false, isSidebarEnabled: true } },
                             { path: 'instructions', element: <Instructions /> },
                             { path: 'support', element: <Support /> },
                             { path: 'statistics', element: <Statistics /> },

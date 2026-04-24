@@ -1,12 +1,12 @@
 import { type FC, useState } from "react";
 import { useOutletContext } from "react-router";
-import ArticleSourceCard from "@/components/forms/ArticleSourceCard";
-import QuantitiesCard from "@/components/forms/QuantitiesCard";
-import TaxonomyCard from "@/components/forms/TaxonomyCard";
-import CollectionEventCard from "@/components/forms/CollectionEventCard";
-import GeographyCard from "@/components/forms/GeographyCard";
-import Sidebar from "@/components/layout/Sidebar";
-import Footer from "@/components/layout/Footer";
+import ArticleSourceCard from "@/components/form/ArticleSourceCard";
+import QuantitiesCard from "@/components/form/QuantitiesCard";
+import TaxonomyCard from "@/components/form/TaxonomyCard";
+import CollectionEventCard from "@/components/form/CollectionEventCard";
+import GeographyCard from "@/components/form/GeographyCard";
+import Sidebar from "@/components/form/FormSidebar";
+import Footer from "@/components/form/FormFooter";
 import type { InsertRecordsRequest } from "@/types/api.dto";
 
 interface OutletContextType {
