@@ -10,7 +10,10 @@
     "preview": "vite preview",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix",
-    "format": "oxfmt ."
+    "format": "oxfmt .",
+    "eslint": "eslint",
+    "eslint:fix": "eslint --fix",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@fontsource-variable/geist": "^5.2.8",

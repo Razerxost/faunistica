@@ -7,6 +7,7 @@ import CollectionEventCard from "@/components/form/CollectionEventCard";
 import GeographyCard from "@/components/form/GeographyCard";
 import Sidebar from "@/components/form/FormSidebar";
 import Footer from "@/components/form/FormFooter";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import type { InsertRecordsRequest } from "@/types/api.dto";
 
 interface OutletContextType {
@@ -31,8 +32,8 @@ const FormFilling: FC = () => {
     };
 
     const addSample = () => {
-        setSamples(prev => [...prev, {}]);
-        setActiveSampleIndex(samples.length); // Next index
+        setSamples(prev => [{}, ...prev]);
+        setActiveSampleIndex(0); // The new item is at the top
     };
 
     const removeSample = (index: number) => {
@@ -44,13 +45,16 @@ const FormFilling: FC = () => {
 
         setActiveSampleIndex(prev => {
             if (samples.length - 1 === 0) return 0;
-            if (prev >= index && prev > 0) return prev - 1;
+            // If we deleted the active one, fallback to 0
+            if (prev === index) return 0;
+            // If the deleted one was before the active one, shift active index down
+            if (index < prev) return prev - 1;
             return prev;
         });
     };
 
     return (
-        <>
+        <SidebarProvider open={true} openMobile={isSidebarOpen} onOpenMobileChange={setIsSidebarOpen} className="min-h-0 flex-1">
             <Sidebar
                 isOpen={isSidebarOpen}
                 setIsOpen={setIsSidebarOpen}
@@ -72,7 +76,7 @@ const FormFilling: FC = () => {
                 </div>
                 <Footer />
             </main>
-        </>
+        </SidebarProvider>
     );
 };
 
