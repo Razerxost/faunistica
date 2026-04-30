@@ -12,15 +12,19 @@ import {
 import { motion, useScroll, useMotionValueEvent } from "framer-motion";
 import { toast } from "sonner";
 
+interface FooterProps {
+    isAutoSaving: boolean;
+    lastSavedTime: Date | null;
+    onSubmit: () => void;
+    isValid: boolean;
+}
+
 const ENABLE_MOTION_ON_DESKTOP = true;
 
-const Footer: FC = () => {
+const Footer: FC<FooterProps> = ({ isAutoSaving, lastSavedTime, onSubmit, isValid }) => {
     const navigate = useNavigate();
     const [isHidden, setIsHidden] = useState(false);
     const [isDesktop, setIsDesktop] = useState(false);
-
-    const [isDraftSaving, setIsDraftSaving] = useState(false);
-    const [draftSavedTime, setDraftSavedTime] = useState<string | null>(null);
 
     // Состояния для диалога отправки
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -55,30 +59,25 @@ const Footer: FC = () => {
         }
     });
 
-    const handleSaveDraft = () => {
-        setIsDraftSaving(true);
-
-        setTimeout(() => {
-            setIsDraftSaving(false);
-            const now = new Date();
-            setDraftSavedTime(now.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' }));
-        }, 1500);
-    };
-
     const handleSubmit = async () => {
         setIsSubmitting(true);
 
-        // Пауза 3 секунды для имитации отправки
-        await new Promise(resolve => setTimeout(resolve, 3000));
+        try {
+            await onSubmit();
+            
+            toast.success("Успех!", {
+                description: "Ваши данные были успешно отправлены.",
+                duration: 3000,
+            });
 
-        toast.success("Успех!", {
-            description: "Ваши данные были успешно отправлены.",
-            duration: 3000,
-        });
-
-        setIsDialogOpen(false);
-        setIsSubmitting(false);
-        navigate("/dashboard");
+            setIsDialogOpen(false);
+            navigate("/dashboard");
+        } catch (error) {
+            toast.error("Ошибка при отправке данных");
+            console.error(error);
+        } finally {
+            setIsSubmitting(false);
+        }
     };
 
     const shouldAnimate = ENABLE_MOTION_ON_DESKTOP ? isHidden : (!isDesktop && isHidden);
@@ -95,25 +94,30 @@ const Footer: FC = () => {
                 className="fixed bottom-0 left-0 right-0 lg:left-64 bg-white/95 backdrop-blur-md px-4 md:px-10 py-4 border-t border-slate-200 z-40 flex flex-col md:flex-row items-center justify-between gap-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]"
             >
                 <div className="flex items-center gap-3 text-sm text-slate-500 order-2 md:order-1 w-full md:w-auto justify-center md:justify-start">
-                    <span className="flex h-2.5 w-2.5 rounded-full bg-slate-900 animate-pulse"></span>
+                    <span className={`flex h-2.5 w-2.5 rounded-full ${isAutoSaving ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'}`}></span>
                     <span className="font-medium">
-                        {draftSavedTime ? `Последнее сохранение: ${draftSavedTime}` : "Автосохранение: 14:32"}
+                        {isAutoSaving 
+                            ? "Сохранение..." 
+                            : lastSavedTime 
+                                ? `Последнее сохранение: ${lastSavedTime.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}`
+                                : "Ожидание изменений..."}
                     </span>
                 </div>
 
                 <div className="flex w-full md:w-auto gap-3 order-1 md:order-2">
                     <Button
-                        variant="outline"
-                        onClick={handleSaveDraft}
-                        disabled={isDraftSaving}
+                        onClick={() => onSubmit()}
+                        disabled={isAutoSaving || !isValid}
                         className="flex-1 md:flex-none md:px-6 font-semibold border-slate-300 text-slate-700 hover:bg-slate-50 transition-all w-48"
+                        variant="outline"
                     >
-                        {isDraftSaving ? "Сохранение..." : "Сохранить черновик"}
+                        {isAutoSaving ? "Сохранение..." : "Сохранить сейчас"}
                     </Button>
 
                     <Button
                         onClick={() => setIsDialogOpen(true)}
-                        className="flex-1 md:flex-none bg-slate-900 text-white hover:bg-slate-800 md:px-8 font-bold shadow-md hover:shadow-lg transition-all"
+                        disabled={!isValid}
+                        className="flex-1 md:flex-none bg-slate-900 text-white hover:bg-slate-800 md:px-8 font-bold shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         Отправить данные
                     </Button>
@@ -138,7 +142,7 @@ const Footer: FC = () => {
                         </Button>
                         <Button
                             onClick={handleSubmit}
-                            disabled={isSubmitting}
+                            disabled={isSubmitting || !isValid}
                             className="bg-slate-900 text-white hover:bg-slate-800"
                         >
                             {isSubmitting ? "Отправка..." : "Отправить"}

@@ -1,4 +1,4 @@
-import { type FC, useEffect, useState } from 'react';
+import { type FC, useEffect, useState, useCallback } from 'react';
 import { useOutletContext, useParams } from 'react-router';
 import { useForm, FormProvider, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -34,6 +34,8 @@ const FormFilling: FC = () => {
     const user_id = useSelector((state: RootState) => state.user.user_id);
 
     const [activeSampleIndex, setActiveSampleIndex] = useState(0);
+    const [isAutoSaving, setIsAutoSaving] = useState(false);
+    const [lastSavedTime, setLastSavedTime] = useState<Date | null>(null);
 
     const { data: recordsData, isLoading } = useGetRecordsDataQuery(
         { publ_id, user_id: user_id! },
@@ -49,14 +51,18 @@ const FormFilling: FC = () => {
         defaultValues: {
             samples: [{}],
         },
+        mode: 'onChange',
     });
 
-    const { control, reset, getValues } = methods;
+    const { control, reset, getValues, watch, formState: { isValid, dirtyFields } } = methods;
 
-    const { fields, append, remove } = useFieldArray({
+    const { fields, append, remove, insert } = useFieldArray({
         control,
         name: 'samples',
     });
+
+    // Watch all form values for auto-save
+    const formValues = watch();
 
     useEffect(() => {
         if (recordsData?.items) {
@@ -70,8 +76,10 @@ const FormFilling: FC = () => {
     }, [recordsData, reset]);
 
     const addSample = () => {
-        append({});
-        setActiveSampleIndex(fields.length);
+        // Insert at the beginning (index 0) so new sample appears first in sidebar
+        insert(0, {});
+        // New sample is now at index 0, make it active
+        setActiveSampleIndex(0);
     };
 
     const removeSample = async (index: number) => {
@@ -85,13 +93,35 @@ const FormFilling: FC = () => {
 
         remove(index);
 
-        setActiveSampleIndex(prev => {
-            if (fields.length - 1 === 0) return 0;
+        // After removal, fields.length is already updated in the callback
+        setActiveSampleIndex((prev, currentFields) => {
+            const newLength = currentFields.length - 1;
+            if (newLength === 0) return 0;
             if (prev === index) return 0;
             if (index < prev) return prev - 1;
             return prev;
         });
     };
+
+    // Auto-save effect with debounce
+    useEffect(() => {
+        const handler = setTimeout(async () => {
+            // Only auto-save if form is valid and has changes
+            if (isValid && dirtyFields && Object.keys(dirtyFields).length > 0) {
+                setIsAutoSaving(true);
+                try {
+                    await onSubmit(getValues());
+                    setLastSavedTime(new Date());
+                } catch (error) {
+                    console.error('Auto-save error:', error);
+                } finally {
+                    setIsAutoSaving(false);
+                }
+            }
+        }, 2000); // Debounce for 2 seconds
+
+        return () => clearTimeout(handler);
+    }, [formValues]);
 
     const onSubmit = async (data: FormSchema) => {
         try {
@@ -126,10 +156,15 @@ const FormFilling: FC = () => {
                 }
                 sample.record_ids = newRecordIds;
             }
-            toast.success('Данные успешно сохранены');
+            if (!isAutoSaving) {
+                toast.success('Данные успешно сохранены');
+            }
         } catch (error) {
-            toast.error('Ошибка при сохранении данных');
+            if (!isAutoSaving) {
+                toast.error('Ошибка при сохранении данных');
+            }
             console.error(error);
+            throw error; // Re-throw for auto-save to catch
         }
     };
 
@@ -162,7 +197,7 @@ const FormFilling: FC = () => {
                             )}
                         </div>
                     </form>
-                    <Footer />
+                    <Footer isAutoSaving={isAutoSaving} lastSavedTime={lastSavedTime} onSubmit={methods.handleSubmit(onSubmit)} isValid={isValid} />
                 </main>
             </SidebarProvider>
         </FormProvider>
