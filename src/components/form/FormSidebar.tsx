@@ -1,7 +1,7 @@
 import { type FC } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
-import { Plus, LogOut, FileText, Trash2, MapPin } from 'lucide-react';
+import { Plus, LogOut, FileText, Trash2, MapPin, X } from 'lucide-react';
 import { Link } from 'react-router';
 import {
     Sidebar,
@@ -37,6 +37,8 @@ interface SidebarProps {
 }
 
 const FormSidebar: FC<SidebarProps> = ({
+    isOpen,
+    setIsOpen,
     activeSampleIndex,
     setActiveSampleIndex,
     addSample,
@@ -45,21 +47,36 @@ const FormSidebar: FC<SidebarProps> = ({
     const { control } = useFormContext<FormSchema>();
     const samples = useWatch({ control, name: 'samples' }) ?? [];
 
+    // Reverse the array so newest samples appear first
+    const reversedSamples = [...samples].reverse();
+
     return (
         <Sidebar variant="sidebar" className="border-r border-slate-200">
             <SidebarHeader className="border-b border-slate-100 p-4">
-                <div className="flex items-center gap-2">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-md bg-slate-900 text-white">
-                        <FileText className="h-4 w-4" />
-                    </div>
-                    <div>
-                        <div className="text-sm font-bold leading-tight text-slate-900">
-                            Менеджер
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-md bg-slate-900 text-white">
+                            <FileText className="h-4 w-4" />
                         </div>
-                        <div className="text-[10px] font-medium leading-tight text-slate-500">
-                            Образцы записей
+                        <div>
+                            <div className="text-sm font-bold leading-tight text-slate-900">
+                                Менеджер
+                            </div>
+                            <div className="text-[10px] font-medium leading-tight text-slate-500">
+                                Образцы записей
+                            </div>
                         </div>
                     </div>
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-slate-400 hover:text-slate-600"
+                        onClick={() => setIsOpen(false)}
+                        aria-label="Закрыть панель"
+                    >
+                        <X className="h-4 w-4" />
+                    </Button>
                 </div>
             </SidebarHeader>
 
@@ -83,11 +100,14 @@ const FormSidebar: FC<SidebarProps> = ({
 
                     <SidebarGroupContent>
                         <SidebarMenu className="gap-1.5 px-2">
-                            {samples.map((sample, index) => {
+                            {reversedSamples.map((sample, reversedIndex) => {
+                                // Convert reversed index back to original index
+                                const index = samples.length - 1 - reversedIndex;
                                 const isActive = index === activeSampleIndex;
                                 const sampleName =
                                     sample?.species || sample?.genus || sample?.family || 'Новый образец';
-                                const sampleNumber = samples.length - index;
+                                // Sample number is the original position + 1 (1-based indexing)
+                                const sampleNumber = index + 1;
 
                                 return (
                                     <SidebarMenuItem key={index}>
