@@ -1,8 +1,8 @@
-import { type FC } from "react";
-import { Button } from "@/components/ui/button";
-import { Plus, LogOut, FileText, Trash2, MapPin } from "lucide-react";
-import type { InsertRecordsRequest } from "@/types/api.dto";
-import { Link } from "react-router";
+import { type FC } from 'react';
+import { useFormContext, useWatch } from 'react-hook-form';
+import { Button } from '@/components/ui/button';
+import { Plus, LogOut, FileText, Trash2, MapPin } from 'lucide-react';
+import { Link } from 'react-router';
 import {
     Sidebar,
     SidebarContent,
@@ -13,7 +13,7 @@ import {
     SidebarGroup,
     SidebarGroupLabel,
     SidebarGroupContent,
-} from "@/components/ui/sidebar";
+} from '@/components/ui/sidebar';
 import {
     AlertDialog,
     AlertDialogAction,
@@ -24,25 +24,27 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
     AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
+} from '@/components/ui/alert-dialog';
+import type { FormSchema } from '@/pages/recordSchema';
 
 interface SidebarProps {
     isOpen: boolean;
     setIsOpen: (isOpen: boolean) => void;
-    samples?: Partial<InsertRecordsRequest>[];
-    activeSampleIndex?: number;
-    setActiveSampleIndex?: (index: number) => void;
-    addSample?: () => void;
-    removeSample?: (index: number) => void;
+    activeSampleIndex: number;
+    setActiveSampleIndex: (index: number) => void;
+    addSample: () => void;
+    removeSample: (index: number) => void;
 }
 
 const FormSidebar: FC<SidebarProps> = ({
-    samples = [],
-    activeSampleIndex = 0,
+    activeSampleIndex,
     setActiveSampleIndex,
     addSample,
     removeSample,
 }) => {
+    const { control } = useFormContext<FormSchema>();
+    const samples = useWatch({ control, name: 'samples' }) ?? [];
+
     return (
         <Sidebar variant="sidebar" className="border-r border-slate-200">
             <SidebarHeader className="border-b border-slate-100 p-4">
@@ -84,7 +86,7 @@ const FormSidebar: FC<SidebarProps> = ({
                             {samples.map((sample, index) => {
                                 const isActive = index === activeSampleIndex;
                                 const sampleName =
-                                    sample.species || sample.genus || sample.family || "Новый образец";
+                                    sample?.species || sample?.genus || sample?.family || 'Новый образец';
                                 const sampleNumber = samples.length - index;
 
                                 return (
@@ -93,21 +95,21 @@ const FormSidebar: FC<SidebarProps> = ({
                                             role="button"
                                             tabIndex={0}
                                             data-active={isActive}
-                                            onClick={() => setActiveSampleIndex?.(index)}
+                                            onClick={() => setActiveSampleIndex(index)}
                                             onKeyDown={(e) => {
-                                                if (e.key === "Enter" || e.key === " ") {
+                                                if (e.key === 'Enter' || e.key === ' ') {
                                                     e.preventDefault();
-                                                    setActiveSampleIndex?.(index);
+                                                    setActiveSampleIndex(index);
                                                 }
                                             }}
                                             className={`group/menu-button flex w-full cursor-pointer flex-col items-start gap-1 rounded-md px-3 py-3 text-left transition-all duration-200 ${isActive
-                                                ? "bg-slate-100 shadow-sm ring-1 ring-slate-200"
-                                                : "hover:bg-slate-50"
+                                                ? 'bg-slate-100 shadow-sm ring-1 ring-slate-200'
+                                                : 'hover:bg-slate-50'
                                                 }`}
                                         >
                                             <div className="flex w-full items-start justify-between gap-2">
                                                 <span
-                                                    className={`mt-0.5 text-xs font-bold leading-tight ${isActive ? "text-slate-900" : "text-slate-700"
+                                                    className={`mt-0.5 text-xs font-bold leading-tight ${isActive ? 'text-slate-900' : 'text-slate-700'
                                                         }`}
                                                 >
                                                     #{sampleNumber} {sampleName}
@@ -144,7 +146,7 @@ const FormSidebar: FC<SidebarProps> = ({
                                                                 variant="destructive"
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
-                                                                    removeSample?.(index);
+                                                                    removeSample(index);
                                                                 }}
                                                             >
                                                                 Удалить
@@ -166,7 +168,7 @@ const FormSidebar: FC<SidebarProps> = ({
                                                 <div className="mt-0.5 flex w-full items-center gap-1.5 text-[10px] text-slate-500">
                                                     <MapPin className="h-3 w-3 shrink-0" />
                                                     <span className="truncate">
-                                                        {sample.place || sample.region || "Нет данных о месте"}
+                                                        {sample?.locality || sample?.region || 'Нет данных о месте'}
                                                     </span>
                                                 </div>
                                             )}

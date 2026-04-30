@@ -3,11 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { FileText } from 'lucide-react';
-import type { InsertRecordsRequest } from "@/types/api.dto";
 
 interface Props {
-    data?: Partial<InsertRecordsRequest>;
-    updateData?: (updates: Partial<InsertRecordsRequest>) => void;
+    index: number;
 }
 
 const ArticleSourceCard: FC<Props> = () => {
