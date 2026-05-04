@@ -37,7 +37,6 @@ export const recordAPI = createApi({
                 params: { user_id },
                 body: recordData,
             }),
-            invalidatesTags: ['record']
         }),
         deleteRecord: build.mutation<void, Types.RecordIdRequest>({
             query: ({ record_id, user_id }) => ({
@@ -45,7 +44,6 @@ export const recordAPI = createApi({
                 method: 'DELETE',
                 params: { user_id },
             }),
-            invalidatesTags: ['record']
         }),
     }),
 });

@@ -1,30 +1,62 @@
-import { type FC, useState } from 'react';
-import { useFormContext, Controller } from 'react-hook-form';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import Autocomplete from '@/components/ui/autocomplete';
+import { Button } from '@/components/ui/button';
+
 import SavedPresetSelect from './SavedPresetSelect';
-import { MapPin, Info } from 'lucide-react';
+
+import 'leaflet/dist/leaflet.css';
+import { type FC, useState, useEffect } from 'react';
+import { useFormContext, Controller } from 'react-hook-form';
+import { Map as MapIcon, MapPin } from 'lucide-react';
+
+import { GeographyMap } from '@/components/map/GeographyMap';
+import { DMInputGroup, DMSInputGroup } from '@/components/map/CoordinateInputs';
+import { GEOREF_OPTIONS, COUNTRY_OPTIONS, type FormSchema } from '@/types/forms';
+
+
 import { useDebouncedCallback } from '@/hooks/useDebounce';
 import { useLazyGeoSearchQuery } from '@/api/utilAPI';
-import { GEOREF_OPTIONS } from '@/pages/recordValidation';
-import type { FormSchema } from '@/pages/recordSchema';
 
-interface Props {
-    index: number;
-    publ_id: number;
-}
+interface Props { index: number; publ_id: number; }
 
 const GeographyCard: FC<Props> = ({ index }) => {
     const { register, control, watch, setValue, formState: { errors } } = useFormContext<FormSchema>();
     const prefix = `samples.${index}` as const;
     const err = errors.samples?.[index];
 
-    const regionValue = watch(`${prefix}.region`);
+    const georefSource = watch(`${prefix}.georef_source`);
+    const latValue = watch(`${prefix}.latitude`);
+    const lonValue = watch(`${prefix}.longitude`);
+
+    const isNone = !georefSource || georefSource === 'none';
+    const isArticle = georefSource === 'lit';
+    const isCustom = georefSource === 'vol';
+
+    const [showMap, setShowMap] = useState(false);
+    const [coordFormat, setCoordFormat] = useState<'DD' | 'DM' | 'DMS'>('DD');
+
+    useEffect(() => {
+        if (isCustom) {
+            setValue(`${prefix}.verbatimcoordinates` as any, null, { shouldValidate: true });
+        }
+    }, [isCustom, prefix, setValue]);
+
+    // Reset local state when switching samples
+    useEffect(() => {
+        setShowMap(false);
+        setCoordFormat('DD');
+    }, [index]);
+
+    const handleMapSelect = (lat: number, lng: number) => {
+        setValue(`${prefix}.latitude` as any, lat, { shouldValidate: true });
+        setValue(`${prefix}.longitude` as any, lng, { shouldValidate: true });
+    };
 
     // ── Geo search queries ──
     const [searchRegion, { isFetching: regionLoading }] = useLazyGeoSearchQuery();
@@ -38,6 +70,8 @@ const GeographyCard: FC<Props> = ({ index }) => {
         setRegionSuggestions(result.suggestions ?? []);
     }, 300);
 
+    const regionValue = watch(`${prefix}.region`);
+
     const handleDistrictSearch = useDebouncedCallback(async (text: string) => {
         const result = await searchDistrict({ field: 'district', text, region: regionValue ?? undefined }).unwrap();
         setDistrictSuggestions(result.suggestions ?? []);
@@ -45,6 +79,7 @@ const GeographyCard: FC<Props> = ({ index }) => {
 
     return (
         <Card className="border-slate-200 shadow-sm">
+            {/* ... CardHeader и блоки Административной географии ... */}
             <CardHeader className="pb-4">
                 <div className="flex items-center gap-2">
                     <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
@@ -53,14 +88,14 @@ const GeographyCard: FC<Props> = ({ index }) => {
                     <CardTitle className="text-lg font-semibold">Пространственная локализация</CardTitle>
                 </div>
             </CardHeader>
+
             <CardContent className="space-y-6">
-                {/* ── Saved preset ── */}
                 <SavedPresetSelect type="location" currentIndex={index} />
 
                 {/* ── Row 1: Coordinate origin + Remarks ── */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 border-b border-slate-100 pb-6">
                     <div className="space-y-3">
-                        <Label className="font-medium">Происхождение координат <span className="text-red-500">*</span></Label>
+                        <Label className="font-medium">Происхождение координат</Label>
                         <Controller
                             name={`${prefix}.georef_source`}
                             control={control}
@@ -97,11 +132,28 @@ const GeographyCard: FC<Props> = ({ index }) => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div className="space-y-2">
                         <Label htmlFor={`${prefix}.country`}>Страна</Label>
-                        <Input
-                            id={`${prefix}.country`}
-                            placeholder="RU"
+                        <Controller
+                            name={`${prefix}.country`}
+                            control={control}
                             defaultValue="RU"
-                            {...register(`${prefix}.country`)}
+                            render={({ field }) => (
+                                <Select
+                                    onValueChange={field.onChange}
+                                    defaultValue={field.value}
+                                    value={field.value}
+                                >
+                                    <SelectTrigger id={`${prefix}.country`} className="w-full" aria-invalid={!!err?.country}>
+                                        <SelectValue placeholder="Выберите страну" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {COUNTRY_OPTIONS.map(opt => (
+                                            <SelectItem key={opt.value} value={opt.value}>
+                                                {opt.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            )}
                         />
                     </div>
                     <div className="space-y-2">
@@ -121,6 +173,7 @@ const GeographyCard: FC<Props> = ({ index }) => {
                                     suggestions={regionSuggestions}
                                     isLoading={regionLoading}
                                     placeholder="Начните вводить…"
+                                    ariaInvalid={!!err?.region}
                                 />
                             )}
                         />
@@ -142,6 +195,7 @@ const GeographyCard: FC<Props> = ({ index }) => {
                                     suggestions={districtSuggestions}
                                     isLoading={districtLoading}
                                     placeholder="Начните вводить…"
+                                    ariaInvalid={!!err?.district}
                                 />
                             )}
                         />
@@ -151,76 +205,105 @@ const GeographyCard: FC<Props> = ({ index }) => {
                         <Input
                             id={`${prefix}.locality`}
                             placeholder="Исходное название места из статьи"
+                            aria-invalid={!!err?.locality}
                             {...register(`${prefix}.locality`)}
                         />
                     </div>
                 </div>
 
-                {/* ── Row 3: Coordinates ── */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 border-t border-slate-100 pt-5">
-                    <TooltipProvider>
-                        <div className="space-y-2">
-                            <div className="flex items-center gap-1">
-                                <Label htmlFor={`${prefix}.verbatimcoordinates`}>Координаты (исходный текст)</Label>
-                                <Tooltip>
-                                    <TooltipTrigger asChild>
-                                        <Info className="h-3.5 w-3.5 text-slate-400 cursor-help" />
-                                    </TooltipTrigger>
-                                    <TooltipContent side="top" className="max-w-xs text-xs">
-                                        Координаты в формате оригинала статьи (доли градуса, минуты/секунды и т.д.).
-                                        Сверяйтесь с источником и тщательно выбирайте формат.
-                                    </TooltipContent>
-                                </Tooltip>
+                {!isNone && (
+                    <div className="border-t border-slate-100 pt-5 space-y-6">
+
+                        {/* --- ВВОД ИЗ СТАТЬИ --- */}
+                        {isArticle && (
+                            <div className="space-y-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-2">
+                                        <Label>Формат ввода координат</Label>
+                                        <Select value={coordFormat} onValueChange={(val: 'DD' | 'DM' | 'DMS') => setCoordFormat(val)}>
+                                            <SelectTrigger><SelectValue /></SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="DD">Десятичные градусы (DD)</SelectItem>
+                                                <SelectItem value="DM">Градусы и минуты (DM)</SelectItem>
+                                                <SelectItem value="DMS">Градусы, минуты, секунды (DMS)</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+
+                                    {/* <div className="space-y-2">
+                                        <Label htmlFor={`${prefix}.verbatimcoordinates`}>Исходная строка (verbatim)</Label>
+                                        <Input
+                                            id={`${prefix}.verbatimcoordinates`}
+                                            placeholder="Соберется автоматически..."
+                                            readOnly={coordFormat !== 'DD'} // Разрешаем ручной ввод только в DD
+                                            className={coordFormat !== 'DD' ? "bg-slate-100 cursor-not-allowed" : ""}
+                                            {...register(`${prefix}.verbatimcoordinates`)}
+                                        />
+                                    </div> */}
+                                </div>
+
+                                {/* Динамические поля ввода */}
+                                {coordFormat === 'DM' && <DMInputGroup prefix={prefix} />}
+                                {coordFormat === 'DMS' && <DMSInputGroup prefix={prefix} />}
                             </div>
-                            <Input
-                                id={`${prefix}.verbatimcoordinates`}
-                                placeholder="50.686 N, 54.472 E"
-                                {...register(`${prefix}.verbatimcoordinates`)}
-                            />
+                        )}
+
+                        {/* --- РУЧНАЯ ГЕОПРИВЯЗКА (КАРТА) --- */}
+                        {isCustom && (
+                            <div className="space-y-4">
+                                <Button type="button" variant="outline" onClick={() => setShowMap(!showMap)}>
+                                    <MapIcon className="w-4 h-4 mr-2" />
+                                    {showMap ? 'Скрыть карту' : 'Выбрать на карте'}
+                                </Button>
+
+                                {showMap && (
+                                    <GeographyMap
+                                        latitude={latValue}
+                                        longitude={lonValue}
+                                        onLocationSelect={handleMapSelect}
+                                    />
+                                )}
+                            </div>
+                        )}
+
+                        {/* --- ОБЩИЕ ПОЛЯ DD (Отображаются всегда) --- */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor={`${prefix}.latitude`}>Широта (DD)</Label>
+                                <Input
+                                    id={`${prefix}.latitude`}
+                                    type="number"
+                                    step="any"
+                                    readOnly={isArticle && coordFormat !== 'DD'} // Блокируем если введены DM/DMS
+                                    className={(isArticle && coordFormat !== 'DD') ? "bg-slate-100 cursor-not-allowed" : ""}
+                                    aria-invalid={!!err?.latitude}
+                                    {...register(`${prefix}.latitude` as any, { valueAsNumber: true })}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor={`${prefix}.longitude`}>Долгота (DD)</Label>
+                                <Input
+                                    id={`${prefix}.longitude`}
+                                    type="number"
+                                    step="any"
+                                    readOnly={isArticle && coordFormat !== 'DD'}
+                                    className={(isArticle && coordFormat !== 'DD') ? "bg-slate-100 cursor-not-allowed" : ""}
+                                    aria-invalid={!!err?.longitude}
+                                    {...register(`${prefix}.longitude` as any, { valueAsNumber: true })}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor={`${prefix}.coordinate_uncertainty`}>Неопределённость, м</Label>
+                                <Input
+                                    id={`${prefix}.coordinate_uncertainty`}
+                                    type="number"
+                                    {...register(`${prefix}.coordinate_uncertainty` as any, { valueAsNumber: true })}
+                                />
+                            </div>
                         </div>
-                    </TooltipProvider>
 
-                    <div className="space-y-2">
-                        <Label htmlFor={`${prefix}.latitude`}>Широта (°)</Label>
-                        <Input
-                            id={`${prefix}.latitude`}
-                            type="number"
-                            step="any"
-                            min={-90}
-                            max={90}
-                            placeholder="от -90 до 90"
-                            {...register(`${prefix}.latitude`, { valueAsNumber: true })}
-                        />
-                        {err?.latitude && <p className="text-xs text-red-500">{err.latitude.message}</p>}
                     </div>
-
-                    <div className="space-y-2">
-                        <Label htmlFor={`${prefix}.longitude`}>Долгота (°)</Label>
-                        <Input
-                            id={`${prefix}.longitude`}
-                            type="number"
-                            step="any"
-                            min={-180}
-                            max={180}
-                            placeholder="от -180 до 180"
-                            {...register(`${prefix}.longitude`, { valueAsNumber: true })}
-                        />
-                        {err?.longitude && <p className="text-xs text-red-500">{err.longitude.message}</p>}
-                    </div>
-
-                    <div className="space-y-2">
-                        <Label htmlFor={`${prefix}.coordinate_uncertainty`}>Неопределённость, м</Label>
-                        <Input
-                            id={`${prefix}.coordinate_uncertainty`}
-                            type="number"
-                            min={30}
-                            max={15000}
-                            placeholder="30 – 15 000"
-                            {...register(`${prefix}.coordinate_uncertainty`, { valueAsNumber: true })}
-                        />
-                        {err?.coordinate_uncertainty && <p className="text-xs text-red-500">{err.coordinate_uncertainty.message}</p>}
-                    </div>
-                </div>
+                )}
             </CardContent>
         </Card>
     );

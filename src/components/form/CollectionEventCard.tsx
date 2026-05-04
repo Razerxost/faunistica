@@ -7,7 +7,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 import SavedPresetSelect from './SavedPresetSelect';
 import { CalendarDays, Info } from 'lucide-react';
-import type { FormSchema } from '@/pages/recordSchema';
+import type { FormSchema } from '@/types/forms';
 
 interface Props {
     index: number;
@@ -15,8 +15,9 @@ interface Props {
 }
 
 const CollectionEventCard: FC<Props> = ({ index }) => {
-    const { register } = useFormContext<FormSchema>();
+    const { register, formState: { errors } } = useFormContext<FormSchema>();
     const prefix = `samples.${index}` as const;
+    const err = errors.samples?.[index];
 
     return (
         <Card className="border-slate-200 shadow-sm">
@@ -51,6 +52,7 @@ const CollectionEventCard: FC<Props> = ({ index }) => {
                             <Input
                                 id={`${prefix}.verbatim_date`}
                                 placeholder="19.08-02.09.2018"
+                                aria-invalid={!!err?.verbatim_date}
                                 {...register(`${prefix}.verbatim_date`)}
                             />
                         </div>
@@ -61,6 +63,7 @@ const CollectionEventCard: FC<Props> = ({ index }) => {
                         <Input
                             id={`${prefix}.recorded_by`}
                             placeholder="Фамилия И.О."
+                            aria-invalid={!!err?.recorded_by}
                             {...register(`${prefix}.recorded_by`)}
                         />
                     </div>
@@ -70,6 +73,7 @@ const CollectionEventCard: FC<Props> = ({ index }) => {
                         <Input
                             id={`${prefix}.sampling_protocol`}
                             placeholder="ловушки Барбера, кошение сачком…"
+                            aria-invalid={!!err?.sampling_protocol}
                             {...register(`${prefix}.sampling_protocol`)}
                         />
                     </div>
@@ -90,9 +94,9 @@ const CollectionEventCard: FC<Props> = ({ index }) => {
                                     </TooltipContent>
                                 </Tooltip>
                             </div>
-                            <Textarea
+                            <Input
                                 id={`${prefix}.habitat`}
-                                className="min-h-[72px] resize-none"
+                                className="min-h-[32px] resize-none"
                                 placeholder="Описание местообитания; второе местообитание"
                                 {...register(`${prefix}.habitat`)}
                             />

@@ -1,12 +1,13 @@
-import { type FC, useMemo } from 'react';
+import { type FC, useMemo, useState } from 'react';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { History } from 'lucide-react';
-import type { FormSchema, RecordSchema } from '@/pages/recordSchema';
+import { Button } from '@/components/ui/button';
+import { History, Check, X } from 'lucide-react';
+import type { FormSchema, RecordSchema } from '@/types/forms';
 import {
     LOCATION_FIELDS, EVENT_FIELDS,
     buildLocationLabel, buildEventLabel,
-} from '@/pages/recordValidation';
+} from '@/types/forms';
 
 type PresetType = 'location' | 'event';
 
@@ -31,18 +32,21 @@ const LABEL_BUILDERS: Record<PresetType, (d: Record<string, unknown>) => string>
     event: buildEventLabel,
 };
 
-const PLACEHOLDER: Record<PresetType, string> = {
-    location: 'Использовать сохранённое место…',
-    event: 'Использовать сохранённое событие…',
+const BUTTON_TEXT: Record<PresetType, string> = {
+    location: 'Заполнить как у другого образца (место)',
+    event: 'Заполнить как у другого образца (событие)',
 };
 
 /**
- * Dropdown that lets the user reuse Location or Event data
+ * Button + dropdown that lets the user reuse Location or Event data
  * from another sample within the same publication.
+ * Hidden by default, shown only when user clicks the button.
+ * After selection, the component hides again.
  */
 const SavedPresetSelect: FC<Props> = ({ type, currentIndex }) => {
     const { setValue } = useFormContext<FormSchema>();
     const samples = useWatch<FormSchema, 'samples'>({ name: 'samples' });
+    const [isOpen, setIsOpen] = useState(false);
 
     const presets = useMemo<Preset[]>(() => {
         if (!samples || samples.length <= 1) return [];
@@ -62,14 +66,16 @@ const SavedPresetSelect: FC<Props> = ({ type, currentIndex }) => {
             });
             if (!hasData) return;
 
-            const label = buildLabel(sample as Record<string, unknown>);
-            if (seen.has(label)) return;
-            seen.add(label);
-
             const data: Partial<RecordSchema> = {};
             for (const f of fields) {
                 (data as Record<string, unknown>)[f] = (sample as Record<string, unknown>)[f];
             }
+
+            const hash = JSON.stringify(data);
+            if (seen.has(hash)) return;
+            seen.add(hash);
+
+            const label = buildLabel(sample as Record<string, unknown>);
             result.push({ label, sourceIndex: idx, data });
         });
 
@@ -88,24 +94,63 @@ const SavedPresetSelect: FC<Props> = ({ type, currentIndex }) => {
             const val = (preset.data as Record<string, unknown>)[f];
             setValue(`samples.${currentIndex}.${f}` as any, val ?? null, { shouldDirty: true });
         }
+        // Close and hide after selection
+        setIsOpen(false);
     };
 
+    if (isOpen) {
+        return (
+            <div className="mb-4 flex items-center gap-2">
+                <div className="flex-1">
+                    <Select
+                        onValueChange={handleSelect}
+                        defaultValue=""
+                        onOpenChange={(open) => {
+                            if (!open) setIsOpen(false);
+                        }}
+                        defaultOpen={true}
+                    >
+                        <SelectTrigger className="w-full bg-blue-50 border-blue-200 text-sm h-10">
+                            <SelectValue placeholder="Выберите образец для копирования…" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {presets.map((p) => (
+                                <SelectItem key={p.sourceIndex} value={String(p.sourceIndex)}>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-xs font-semibold text-blue-600">#{samples.length - p.sourceIndex}</span>
+                                        <span className="text-slate-700">{p.label}</span>
+                                    </div>
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                </div>
+                <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setIsOpen(false)}
+                    className="h-10 w-10 p-0 text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+                    title="Отменить"
+                >
+                    <X className="h-4 w-4" />
+                </Button>
+            </div>
+        );
+    }
+
     return (
-        <div className="flex items-center gap-2 mb-4 p-3 rounded-lg bg-blue-50/60 border border-blue-100">
-            <History className="h-4 w-4 text-blue-500 shrink-0" />
-            <Select onValueChange={handleSelect}>
-                <SelectTrigger className="flex-1 bg-white border-blue-200 text-sm h-9">
-                    <SelectValue placeholder={PLACEHOLDER[type]} />
-                </SelectTrigger>
-                <SelectContent>
-                    {presets.map((p) => (
-                        <SelectItem key={p.sourceIndex} value={String(p.sourceIndex)}>
-                            <span className="text-xs text-slate-400 mr-1.5">#{samples.length - p.sourceIndex}</span>
-                            {p.label}
-                        </SelectItem>
-                    ))}
-                </SelectContent>
-            </Select>
+        <div className="mb-4">
+            <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setIsOpen(true)}
+                className="w-full gap-2 border-blue-200 text-blue-700 hover:bg-blue-50 hover:text-blue-800"
+            >
+                <History className="h-4 w-4" />
+                {BUTTON_TEXT[type]}
+            </Button>
         </div>
     );
 };

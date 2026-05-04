@@ -1,6 +1,5 @@
 import type { RecordData, DraftRecord, RecordFull } from '@/types/api.dto';
-import type { RecordSchema } from '@/pages/recordSchema';
-import type { QuantityField } from '@/pages/recordValidation';
+import type { RecordSchema, QuantityField } from '@/types/forms';
 
 export const getFieldFromSexAndLifestage = (sex?: string | null, life_stage?: string | null): QuantityField | null => {
     if (sex === 'male' && life_stage === 'взрослые') return 'mmm';
@@ -54,6 +53,11 @@ export const groupRecordsIntoDrafts = (records: RecordFull[]): DraftRecord[] => 
             (draft as any)[field] = record.quantity;
             if (draft.record_ids) {
                 draft.record_ids[field] = record.id;
+            }
+        } else {
+            // Store as base record if it doesn't have a quantity yet
+            if (draft.record_ids) {
+                draft.record_ids['base'] = record.id;
             }
         }
 

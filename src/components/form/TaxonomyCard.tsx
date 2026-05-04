@@ -10,16 +10,17 @@ import Autocomplete from '@/components/ui/autocomplete';
 import { Bug } from 'lucide-react';
 import { useDebouncedCallback } from '@/hooks/useDebounce';
 import { useLazySuggestTaxonQuery } from '@/api/utilAPI';
-import { TYPE_STATUS_OPTIONS, TAXON_RANK_OPTIONS } from '@/pages/recordValidation';
-import type { FormSchema } from '@/pages/recordSchema';
+import { TYPE_STATUS_OPTIONS, TAXON_RANK_OPTIONS } from '@/types/forms';
+import type { FormSchema } from '@/types/forms';
 
 interface Props {
     index: number;
 }
 
 const TaxonomyCard: FC<Props> = ({ index }) => {
-    const { register, control, watch, setValue } = useFormContext<FormSchema>();
+    const { register, control, watch, setValue, formState: { errors } } = useFormContext<FormSchema>();
     const prefix = `samples.${index}` as const;
+    const err = errors.samples?.[index];
 
     const familyValue = watch(`${prefix}.family`);
     const genusValue = watch(`${prefix}.genus`);
@@ -89,6 +90,7 @@ const TaxonomyCard: FC<Props> = ({ index }) => {
                                     suggestions={familySuggestions}
                                     isLoading={famLoading}
                                     placeholder="Начните вводить…"
+                                    ariaInvalid={!!err?.family}
                                 />
                             )}
                         />
@@ -109,6 +111,7 @@ const TaxonomyCard: FC<Props> = ({ index }) => {
                                     suggestions={genusSuggestions}
                                     isLoading={genLoading}
                                     placeholder="Название рода"
+                                    ariaInvalid={!!err?.genus}
                                 />
                             )}
                         />
@@ -129,6 +132,7 @@ const TaxonomyCard: FC<Props> = ({ index }) => {
                                     suggestions={speciesSuggestions}
                                     isLoading={spLoading}
                                     placeholder="Только эпитет, без рода"
+                                    ariaInvalid={!!err?.species}
                                 />
                             )}
                         />
@@ -144,7 +148,7 @@ const TaxonomyCard: FC<Props> = ({ index }) => {
                             control={control}
                             render={({ field }) => (
                                 <Select value={field.value ?? ''} onValueChange={field.onChange}>
-                                    <SelectTrigger><SelectValue placeholder="Выберите ранг" /></SelectTrigger>
+                                    <SelectTrigger aria-invalid={!!err?.taxon_rank}><SelectValue placeholder="Выберите ранг" /></SelectTrigger>
                                     <SelectContent>
                                         {TAXON_RANK_OPTIONS.map(opt => (
                                             <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>

@@ -6,8 +6,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Hash } from 'lucide-react';
-import { QUANTITY_FIELD_LABELS, QUANTITY_TYPE_OPTIONS } from '@/pages/recordValidation';
-import type { FormSchema } from '@/pages/recordSchema';
+import { QUANTITY_FIELD_LABELS, QUANTITY_TYPE_OPTIONS } from '@/types/forms';
+import type { FormSchema } from '@/types/forms';
 
 interface Props {
     index: number;
