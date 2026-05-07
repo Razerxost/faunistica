@@ -1,3 +1,6 @@
+// src/types/forms.ts
+import { z } from "zod";
+
 export const LAT_MIN = -90;
 export const LAT_MAX = 90;
 export const LNG_MIN = -180;
@@ -5,14 +8,12 @@ export const LNG_MAX = 180;
 export const UNCERTAINTY_MIN = 30;
 export const UNCERTAINTY_MAX = 15000;
 
-// src/types/forms.ts
-
 // 🔒 Поля, обязательные для перехода к следующему образцу
 export const BLOCKING_FIELDS = [
     'country',
     'family',
     'genus',
-    // Координаты: валидируются парой через zod refine
+    // Координаты валидируются ниже через zod.refine
 ] as const;
 
 export type BlockingFieldName = typeof BLOCKING_FIELDS[number];
@@ -129,8 +130,7 @@ export function buildEventLabel(data: Record<string, unknown>): string {
     return parts.length > 0 ? parts.join(' · ') : 'Без данных';
 }
 
-import { z } from "zod";
-
+// ═══ ZOD SCHEMAS ═══
 export const recordSchema = z.object({
     // ═══ LOCATION ═══
     georef_source: z.enum(['lit', 'vol', 'none']).nullish(),
@@ -140,8 +140,8 @@ export const recordSchema = z.object({
     locality: z.string().min(1, "Обязательное поле"),
     is_manual_location: z.boolean().nullish(),
     verbatimcoordinates: z.string().nullish(),
-    latitude: z.number({ invalid_type_error: "Число" }).min(LAT_MIN, `Мин. ${LAT_MIN}`).max(LAT_MAX, `Макс. ${LAT_MAX}`),
-    longitude: z.number({ invalid_type_error: "Число" }).min(LNG_MIN, `Мин. ${LNG_MIN}`).max(LNG_MAX, `Макс. ${LNG_MAX}`),
+    latitude: z.number({ invalid_type_error: "Число" }).min(LAT_MIN, `Мин. ${LAT_MIN}`).max(LAT_MAX, `Макс. ${LAT_MAX}`).nullish(),
+    longitude: z.number({ invalid_type_error: "Число" }).min(LNG_MIN, `Мин. ${LNG_MIN}`).max(LNG_MAX, `Макс. ${LNG_MAX}`).nullish(),
     coordinate_uncertainty: z.number().min(UNCERTAINTY_MIN, `Мин. ${UNCERTAINTY_MIN}`).max(UNCERTAINTY_MAX, `Макс. ${UNCERTAINTY_MAX}`).nullish(),
     location_remarks: z.string().nullish(),
 
@@ -183,6 +183,25 @@ export const recordSchema = z.object({
 
     // ═══ INTERNAL ═══
     record_ids: z.record(z.string(), z.string()).optional(),
+}).refine((data) => {
+    // Coordinate validation: both latitude and longitude must be provided together
+    // Only validate when georef_source is 'lit' or 'vol' (not 'none')
+    const hasCoords = data.georef_source && data.georef_source !== 'none';
+    if (hasCoords) {
+        const hasLat = data.latitude !== undefined && data.latitude !== null;
+        const hasLng = data.longitude !== undefined && data.longitude !== null;
+        if (hasLat && !hasLng) {
+            return { latitude: true }; // Will add error to latitude
+        }
+        if (hasLng && !hasLat) {
+            return { longitude: true }; // Will add error to longitude
+        }
+        return hasLat && hasLng;
+    }
+    return true;
+}, {
+    message: "Необходимо указать обе координаты (широту и долготу)",
+    path: ['latitude'],
 });
 
 export const formSchema = z.object({

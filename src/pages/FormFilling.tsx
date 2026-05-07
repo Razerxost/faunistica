@@ -332,23 +332,24 @@ const FormFilling: FC = () => {
                     removeSample={removeSample}
                 />
                 <main className="flex-1 flex flex-col w-full min-w-0 relative">
-                    <div className="flex-1 w-full p-4 md:p-8 pb-[180px] md:pb-[120px]">
+                    {/* Header offset + Footer offset padding */}
+                    <div className="flex-1 w-full p-4 md:p-8 pt-[80px] pb-[140px] md:pb-[100px]">
                         <div className="max-w-6xl mx-auto space-y-6">
                             {fields.length > 0 && (
                                 <>
-                                    <div className="relative z-20 focus-within:z-50 transition-all duration-200">
+                                    <div className="relative z-30 focus-within:z-50 transition-all duration-200">
                                         <ArticleSourceCard publ_id={publ_id} />
                                     </div>
-                                    <div className="relative z-15 focus-within:z-50 transition-all duration-200">
+                                    <div className="relative z-25 focus-within:z-50 transition-all duration-200">
                                         <GeographyCard key={`geo-${activeSampleIndex}`} index={activeSampleIndex} publ_id={publ_id} />
                                     </div>
-                                    <div className="relative z-10 focus-within:z-50 transition-all duration-200">
+                                    <div className="relative z-20 focus-within:z-50 transition-all duration-200">
                                         <CollectionEventCard key={`event-${activeSampleIndex}`} index={activeSampleIndex} publ_id={publ_id} />
                                     </div>
-                                    <div className="relative z-5 focus-within:z-50 transition-all duration-200">
+                                    <div className="relative z-15 focus-within:z-50 transition-all duration-200">
                                         <TaxonomyCard key={`tax-${activeSampleIndex}`} index={activeSampleIndex} />
                                     </div>
-                                    <div className="relative z-0 focus-within:z-50 transition-all duration-200">
+                                    <div className="relative z-10 focus-within:z-50 transition-all duration-200">
                                         <QuantitiesCard key={`quant-${activeSampleIndex}`} index={activeSampleIndex} />
                                     </div>
                                 </>
