@@ -9,18 +9,23 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { motion, useScroll, useMotionValueEvent } from "framer-motion";
+import { CheckCheck, ShieldCheck } from "lucide-react";
 
 interface FooterProps {
     isAutoSaving: boolean;
     lastSavedTime: Date | null;
-    onSaveDraft: () => void;
+    onSaveAll: () => void;
+    onValidateAll: () => void;
     onSubmit: () => Promise<boolean>;
     isValid: boolean;
+    isValidating: boolean;
 }
 
 const ENABLE_MOTION_ON_DESKTOP = true;
 
-const Footer: FC<FooterProps> = ({ isAutoSaving, lastSavedTime, onSaveDraft, onSubmit, isValid }) => {
+const Footer: FC<FooterProps> = ({
+    isAutoSaving, lastSavedTime, onSaveAll, onValidateAll, onSubmit, isValid, isValidating,
+}) => {
     const [isHidden, setIsHidden] = useState(false);
     const [isDesktop, setIsDesktop] = useState(false);
 
@@ -83,7 +88,7 @@ const Footer: FC<FooterProps> = ({ isAutoSaving, lastSavedTime, onSaveDraft, onS
                 }}
                 animate={shouldAnimate ? "hidden" : "visible"}
                 transition={{ duration: 0.3, ease: "easeOut" }}
-                className="fixed bottom-0 left-0 right-0 md:left-64 bg-white/95 backdrop-blur-md px-4 md:px-10 py-4 border-t border-slate-200 z-40 flex flex-col md:flex-row items-center justify-between gap-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]"
+                className="fixed bottom-0 left-0 right-0 md:left-64 bg-white/95 backdrop-blur-md px-4 md:px-10 py-4 border-t border-slate-200 z-[90] flex flex-col md:flex-row items-center justify-between gap-4 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]"
             >
                 <div className="flex items-center gap-3 text-sm text-slate-500 order-2 md:order-1 w-full md:w-auto justify-center md:justify-start">
                     <span className={`flex h-2.5 w-2.5 rounded-full ${isAutoSaving ? 'bg-amber-500 animate-pulse' : 'bg-emerald-500'}`}></span>
@@ -97,13 +102,26 @@ const Footer: FC<FooterProps> = ({ isAutoSaving, lastSavedTime, onSaveDraft, onS
                 </div>
 
                 <div className="flex w-full md:w-auto gap-3 order-1 md:order-2">
+                    {/* Проверить всё */}
                     <Button
-                        onClick={onSaveDraft}
-                        disabled={isAutoSaving}
-                        className="flex-1 md:flex-none md:px-6 font-semibold border-slate-300 text-slate-700 hover:bg-slate-50 transition-all w-48"
+                        onClick={onValidateAll}
+                        disabled={isValidating}
+                        className="flex-1 md:flex-none md:px-5 font-semibold border-amber-300 text-amber-700 hover:bg-amber-50 transition-all"
                         variant="outline"
                     >
-                        {isAutoSaving ? "Сохранение..." : "Сохранить сейчас"}
+                        <CheckCheck className="h-4 w-4 mr-1.5" />
+                        {isValidating ? "Проверка..." : "Проверить всё"}
+                    </Button>
+
+                    {/* Сохранить всё */}
+                    <Button
+                        onClick={onSaveAll}
+                        disabled={isAutoSaving}
+                        className="flex-1 md:flex-none md:px-5 font-semibold border-slate-300 text-slate-700 hover:bg-slate-50 transition-all"
+                        variant="outline"
+                    >
+                        <ShieldCheck className="h-4 w-4 mr-1.5" />
+                        {isAutoSaving ? "Сохранение..." : "Сохранить всё"}
                     </Button>
 
                     <Button
