@@ -191,7 +191,7 @@ const FormSidebar: FC<SidebarProps> = ({
                             size="sm"
                         >
                             <FileSpreadsheet className="h-4 w-4" />
-                            Импорт из Excel
+                            Работа с Excel
                         </Button>
                     </div>
 

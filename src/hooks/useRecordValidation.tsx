@@ -19,7 +19,7 @@ interface UseRecordValidationOptions {
     fieldArray: UseFieldArrayReturn<FormSchema, 'samples'>;
     activeRecordIndex: number;
     setActiveRecordIndex: (index: number) => void;
-    createServerRecord: (args: { publ_id: number; user_id: number }) => any;
+    createServerRecord: (args: { publ_id: number }) => any;
     publ_id: number;
     user_id: number;
 }
@@ -128,7 +128,7 @@ export function useRecordValidation({
 
         // ✅ Всё ок — создаём на сервере
         try {
-            const created = await createServerRecord({ publ_id, user_id }).unwrap();
+            const created = await createServerRecord({ publ_id }).unwrap();
             prepend({ record_ids: { base: created.id } });
             setActiveRecordIndex(0);
             window.scrollTo({ top: 0, behavior: 'smooth' });

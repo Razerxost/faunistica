@@ -49,7 +49,7 @@ export function useRecordPersistence({
                     const sample = data.samples[i];
                     if (!sample) continue;
 
-                    const baseData = draftToRecordData(sample, publ_id);
+                    const baseData = draftToRecordData(sample);
                     const newRecordIds: Record<string, string> = { ...sample.record_ids };
 
                     const filledQuantities = QUANTITY_FIELDS.filter((f) => {
@@ -62,21 +62,19 @@ export function useRecordPersistence({
                         const existingIds = Object.values(newRecordIds);
                         if (existingIds.length > 0) {
                             await editRecord({
-                                ...baseData,
                                 record_id: existingIds[0],
-                                user_id,
+                                data: baseData,
                             }).unwrap();
                             for (let j = 1; j < existingIds.length; j++) {
-                                await deleteRecord({ record_id: existingIds[j], user_id }).unwrap();
+                                await deleteRecord({ record_id: existingIds[j] }).unwrap();
                             }
                             for (const key in newRecordIds) delete newRecordIds[key];
                             newRecordIds['base'] = existingIds[0];
                         } else {
-                            const created = await createRecord({ publ_id, user_id }).unwrap();
+                            const created = await createRecord({ publ_id }).unwrap();
                             await editRecord({
-                                ...baseData,
                                 record_id: created.id,
-                                user_id,
+                                data: baseData,
                             }).unwrap();
                             newRecordIds['base'] = created.id;
                         }
@@ -101,28 +99,26 @@ export function useRecordPersistence({
 
                                 if (existingId) {
                                     await editRecord({
-                                        ...recordData,
                                         record_id: existingId,
-                                        user_id,
+                                        data: recordData,
                                     }).unwrap();
                                     newRecordIds[field] = existingId;
                                 } else {
-                                    const created = await createRecord({ publ_id, user_id }).unwrap();
+                                    const created = await createRecord({ publ_id }).unwrap();
                                     await editRecord({
-                                        ...recordData,
                                         record_id: created.id,
-                                        user_id,
+                                        data: recordData,
                                     }).unwrap();
                                     newRecordIds[field] = created.id;
                                 }
                             } else if (existingId) {
-                                await deleteRecord({ record_id: existingId, user_id }).unwrap();
+                                await deleteRecord({ record_id: existingId }).unwrap();
                                 delete newRecordIds[field];
                             }
                         }
 
                         if (baseIdToReuse) {
-                            await deleteRecord({ record_id: baseIdToReuse, user_id }).unwrap();
+                            await deleteRecord({ record_id: baseIdToReuse }).unwrap();
                         }
                     }
 
@@ -159,7 +155,7 @@ export function useRecordPersistence({
             const sample = getValues(`samples.${index}`) as any;
             if (sample?.record_ids) {
                 for (const record_id of Object.values(sample.record_ids) as string[]) {
-                    await deleteRecord({ record_id, user_id });
+                    await deleteRecord({ record_id });
                 }
                 toast.success('Запись удалена из базы данных');
             }
