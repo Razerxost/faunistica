@@ -2,23 +2,23 @@ import type { RecordData, DraftRecord, RecordFull } from '@/types/api.dto';
 import type { RecordSchema, QuantityField } from '@/types/forms';
 
 export const getFieldFromSexAndLifestage = (sex?: string | null, life_stage?: string | null): QuantityField | null => {
-    if (sex === 'male' && life_stage === 'взрослые') return 'mmm';
-    if (sex === 'male' && life_stage === 'субвзрослые') return 'ssm';
-    if (sex === 'female' && life_stage === 'взрослые') return 'fff';
-    if (sex === 'female' && life_stage === 'субвзрослые') return 'ssf';
-    if ((sex === 'none' || !sex) && life_stage === 'взрослые') return 'adu';
-    if ((sex === 'none' || !sex) && life_stage === 'ювенильные') return 'juv';
+    if (sex === 'male' && life_stage === 'adult') return 'mmm';
+    if (sex === 'male' && life_stage === 'subadult') return 'ssm';
+    if (sex === 'female' && life_stage === 'adult') return 'fff';
+    if (sex === 'female' && life_stage === 'subadult') return 'ssf';
+    if ((sex === 'none' || !sex) && life_stage === 'adult') return 'adu';
+    if ((sex === 'none' || !sex) && life_stage === 'juvenile') return 'juv';
     return null;
 };
 
 export const getSexAndLifestageFromField = (field: string): { sex: string; life_stage: string } => {
     switch (field) {
-        case 'mmm': return { sex: 'male', life_stage: 'взрослые' };
-        case 'ssm': return { sex: 'male', life_stage: 'субвзрослые' };
-        case 'fff': return { sex: 'female', life_stage: 'взрослые' };
-        case 'ssf': return { sex: 'female', life_stage: 'субвзрослые' };
-        case 'adu': return { sex: 'none', life_stage: 'взрослые' };
-        case 'juv': return { sex: 'none', life_stage: 'ювенильные' };
+        case 'mmm': return { sex: 'male', life_stage: 'adult' };
+        case 'ssm': return { sex: 'male', life_stage: 'subadult' };
+        case 'fff': return { sex: 'female', life_stage: 'adult' };
+        case 'ssf': return { sex: 'female', life_stage: 'subadult' };
+        case 'adu': return { sex: 'none', life_stage: 'adult' };
+        case 'juv': return { sex: 'none', life_stage: 'juvenile' };
         default: return { sex: 'none', life_stage: 'none' };
     }
 };
@@ -83,7 +83,7 @@ export const draftToRecordData = (draft: Partial<RecordSchema>): RecordData => {
     // Process specimens
     const specimens: any[] = [];
     const quantityFields = ['mmm', 'ssm', 'fff', 'ssf', 'adu', 'juv'] as const;
-    
+
     for (const field of quantityFields) {
         const count = (draft as any)[field];
         if (count !== undefined && count !== null && count > 0) {
@@ -91,7 +91,7 @@ export const draftToRecordData = (draft: Partial<RecordSchema>): RecordData => {
             specimens.push({ sex, life_stage, count });
         }
     }
-    
+
     if (specimens.length > 0) {
         data.specimens = specimens;
     }

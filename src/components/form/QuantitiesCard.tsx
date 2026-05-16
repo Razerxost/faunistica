@@ -89,7 +89,7 @@ const QuantitiesCard: FC<Props> = ({ index }) => {
                             name={`${prefix}.quantity_type` as any}
                             control={control}
                             render={({ field }) => (
-                                <Select value={field.value ?? 'особей'} onValueChange={field.onChange}>
+                                <Select value={field.value || undefined} onValueChange={field.onChange}>
                                     <SelectTrigger><SelectValue placeholder="Выберите единицы" /></SelectTrigger>
                                     <SelectContent>
                                         {QUANTITY_TYPE_OPTIONS.map(opt => (
