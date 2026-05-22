@@ -1,20 +1,22 @@
-import { createApi } from "@reduxjs/toolkit/query/react";
+import { createApi } from '@reduxjs/toolkit/query/react';
 import * as Types from '../types/api.dto';
 import { baseQueryWithReauth } from './baseQuery';
-
 
 export const recordAPI = createApi({
     reducerPath: 'recordAPI',
     baseQuery: baseQueryWithReauth,
     tagTypes: ['record'],
     endpoints: (build) => ({
-        getRecordsData: build.query<Types.PaginatedResponse<Types.RecordFull>, Types.RecordListRequest>({
+        getRecordsData: build.query<
+            Types.PaginatedResponse<Types.RecordFull>,
+            Types.RecordListRequest
+        >({
             query: (params) => ({
                 url: '/records/',
                 method: 'GET',
                 params: params,
             }),
-            providesTags: ['record']
+            providesTags: ['record'],
         }),
         getRecordById: build.query<Types.RecordFull, Types.RecordIdRequest>({
             query: ({ record_id }) => ({
@@ -28,7 +30,7 @@ export const recordAPI = createApi({
                 method: 'POST',
                 body: record,
             }),
-            invalidatesTags: ['record']
+            invalidatesTags: ['record'],
         }),
         editRecord: build.mutation<Types.UpdateRecordResponse, Types.EditRecordRequest>({
             query: ({ record_id, data }) => ({
@@ -43,7 +45,10 @@ export const recordAPI = createApi({
                 method: 'DELETE',
             }),
         }),
-        exportRecords: build.mutation<Blob, { user_id: number; publ_id?: number; scope?: string; format?: string }>({
+        exportRecords: build.mutation<
+            Blob,
+            { user_id: number; publ_id?: number; scope?: string; format?: string }
+        >({
             query: (params) => ({
                 url: '/records/export',
                 method: 'GET',

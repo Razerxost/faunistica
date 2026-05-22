@@ -15,10 +15,8 @@ export function useRecordStatus(
     index: number,
     sample: Record<string, any>,
     validationErrors?: Map<number, string[]>,
-    sampleErrors?: Record<string, any>
+    sampleErrors?: Record<string, any>,
 ): RecordStatus {
-
-
     return useMemo(() => {
         // If mass-validation found errors for this record — always show error
         if (validationErrors?.has(index) && (validationErrors.get(index)?.length ?? 0) > 0) {
@@ -26,24 +24,20 @@ export function useRecordStatus(
         }
 
         // 🟡 Пустая запись
-        const hasAnyValue = BLOCKING_FIELDS.some(
-            (field: BlockingFieldName) => {
-                const val = sample?.[field];
-                return val !== undefined && val !== null && val !== '';
-            }
-        );
+        const hasAnyValue = BLOCKING_FIELDS.some((field: BlockingFieldName) => {
+            const val = sample?.[field];
+            return val !== undefined && val !== null && val !== '';
+        });
 
         if (!hasAnyValue) {
             return 'empty';
         }
 
         // 🟢 Все блокирующие поля заполнены и не имеют ошибок
-        const allBlockingFilled = BLOCKING_FIELDS.every(
-            (field: BlockingFieldName) => {
-                const val = sample?.[field];
-                return val !== undefined && val !== null && val !== '';
-            }
-        );
+        const allBlockingFilled = BLOCKING_FIELDS.every((field: BlockingFieldName) => {
+            const val = sample?.[field];
+            return val !== undefined && val !== null && val !== '';
+        });
         if (allBlockingFilled) return 'valid';
 
         // 🔵 В процессе заполнения

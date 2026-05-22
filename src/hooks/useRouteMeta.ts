@@ -1,5 +1,5 @@
 // hooks/useRouteHandle.ts
-import { useMatches } from "react-router";
+import { useMatches } from 'react-router';
 
 export interface RouteHandle {
     isLanding?: boolean;
@@ -18,7 +18,7 @@ export const useRouteHandle = (): RouteHandle => {
         if (handle) {
             result = {
                 ...result,
-                ...handle
+                ...handle,
             };
         }
     }
