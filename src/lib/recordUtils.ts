@@ -1,6 +1,10 @@
-import type { RecordData, DraftRecord, RecordFull } from '@/types/api.dto';
+import type { RecordData, RecordFull } from '@/types/api.dto';
 import type { RecordSchema, QuantityField } from '@/types/forms';
 
+export interface DraftRecord extends RecordFull {
+    record_ids?: Record<string, string>;
+    [key: string]: any;
+}
 export const getFieldFromSexAndLifestage = (sex?: string | null, life_stage?: string | null): QuantityField | null => {
     if (sex === 'male' && life_stage === 'adult') return 'mmm';
     if (sex === 'male' && life_stage === 'subadult') return 'ssm';

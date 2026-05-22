@@ -1,4 +1,5 @@
 import { type FC, useState, useEffect } from "react";
+import { useFormContext } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
     AlertDialog,
@@ -17,15 +18,15 @@ interface FooterProps {
     onSaveAll: () => void;
     onValidateAll: () => void;
     onSubmit: () => Promise<boolean>;
-    isValid: boolean;
     isValidating: boolean;
 }
 
 const ENABLE_MOTION_ON_DESKTOP = true;
 
 const Footer: FC<FooterProps> = ({
-    isAutoSaving, lastSavedTime, onSaveAll, onValidateAll, onSubmit, isValid, isValidating,
+    isAutoSaving, lastSavedTime, onSaveAll, onValidateAll, onSubmit, isValidating,
 }) => {
+    const { formState: { isValid } } = useFormContext();
     const [isHidden, setIsHidden] = useState(false);
     const [isDesktop, setIsDesktop] = useState(false);
 

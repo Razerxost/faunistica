@@ -72,7 +72,7 @@ const FormFilling: FC = () => {
         reValidateMode: 'onChange',
     });
 
-    const { control, reset, getValues, trigger, formState: { isValid } } = methods;
+    const { control, reset, getValues, trigger } = methods;
     const fieldArray = useFieldArray({ control, name: 'samples' });
     const { fields, remove } = fieldArray;
 
@@ -248,7 +248,6 @@ const FormFilling: FC = () => {
                         onSaveAll={handleManualSave}
                         onValidateAll={handleValidateAll}
                         onSubmit={handleFinalSubmit}
-                        isValid={isValid}
                         isValidating={isValidating}
                     />
                 </main>

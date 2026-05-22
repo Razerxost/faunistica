@@ -1,11 +1,9 @@
 import { ArrowRight, Bug } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { useNavigate } from "react-router";
+import { Link } from "react-router";
 
 export default function Hero() {
-    const navigate = useNavigate();
-
     return (
         <section className="relative w-full py-12 md:py-24 lg:py-32 overflow-hidden bg-white">
             <div className="w-full max-w-7xl mx-auto px-4 md:px-6 relative z-10">
@@ -23,11 +21,16 @@ export default function Hero() {
                             </p>
                         </div>
                         <div className="flex flex-col sm:flex-row gap-4">
-                            <Button onClick={() => navigate('/auth/register')} size="lg" className="bg-slate-900 text-white hover:bg-slate-800 gap-2 h-12 px-8 text-base">
-                                Стать волонтером <ArrowRight className="h-4 w-4" />
+                            <Button asChild size="lg" className="bg-slate-900 text-white hover:bg-slate-800 gap-2 h-12 px-8 text-base">
+                                <Link to="/auth/register">
+                                    Стать волонтером <ArrowRight className="h-4 w-4" />
+                                </Link>
                             </Button>
-                            <Button size="lg" variant="outline" className="border-slate-300 bg-white text-slate-700 hover:bg-slate-50 h-12 px-8 text-base">
-                                Узнать больше
+                            <Button asChild size="lg" variant="outline" className="border-slate-300 bg-white text-slate-700 hover:bg-slate-50 h-12 px-8 text-base">
+                                <Link to="/instructions">
+                                    {/* Узнать больше */}
+                                    Инструкция
+                                </Link>
                             </Button>
                         </div>
                     </div>

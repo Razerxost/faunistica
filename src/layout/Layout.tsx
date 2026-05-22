@@ -6,7 +6,7 @@ import Header from "@/layout/Header";
 const Layout: FC = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-    const { isLanding, isSidebarEnabled } = useRouteHandle();
+    const { isLanding, isSidebarEnabled, isFullWidth } = useRouteHandle();
 
     return (
         <div className="flex min-h-screen flex-col overflow-x-clip bg-slate-50 font-sans text-slate-900">
@@ -20,7 +20,7 @@ const Layout: FC = () => {
                     <Outlet context={{ isSidebarOpen, setIsSidebarOpen }} />
                 ) : (
                     <main className="flex min-w-0 flex-1 flex-col w-full">
-                        <div className={isLanding ? "w-full overflow-x-clip" : "flex min-w-0 flex-col flex-1 w-full max-w-5xl mx-auto p-4 md:py-8 space-y-8 overflow-x-clip"}>
+                        <div className={isLanding || isFullWidth ? "w-full overflow-x-clip" : "flex min-w-0 flex-col flex-1 w-full max-w-5xl mx-auto p-4 md:py-8 space-y-8 overflow-x-clip"}>
                             <Outlet />
                         </div>
                     </main>

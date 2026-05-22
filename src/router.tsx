@@ -25,6 +25,7 @@ import Support from './pages/Support';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import TermsOfService from './pages/TermsOfService';
 import Onboarding from './pages/Onboarding';
+import Settings from './pages/Settings';
 
 import { Toaster } from "sonner";
 
@@ -79,11 +80,12 @@ export const routes: RouteObject[] = [
                         index: true,
                         loader: requireGuest,
                         element: <Landing />,
-                        handle: { isLanding: true, isNavigateEnabled: true }
+                        handle: { isLanding: true }
                     },
 
                     {
                         path: 'privacy-policy',
+                        // handle: { isFullWidth: true },
                         element: <PrivacyPolicy />
                     },
 
@@ -96,6 +98,7 @@ export const routes: RouteObject[] = [
                         path: 'auth',
                         loader: requireGuest,
                         element: <AuthLayout />,
+                        handle: { isNavigateEnabled: false },
                         children: [
                             { index: true, element: <Navigate to="login" replace /> },
                             { path: 'login', element: <Login /> },
@@ -104,17 +107,16 @@ export const routes: RouteObject[] = [
                             { path: 'recovery', element: <Recovery /> },
                         ]
                     },
-
+                    { path: 'instructions', element: <Instructions />, handle: { isFullWidth: true } },
                     {
                         loader: requireAuth,
-                        handle: { isNavigateEnabled: true },
                         children: [
                             { path: 'dashboard', element: <Dashboard /> },
                             { path: 'onboarding', element: <Onboarding />, handle: { isNavigateEnabled: false } },
                             { path: 'publication/:id', element: <FormFilling />, handle: { isSidebarEnabled: true } },
-                            { path: 'instructions', element: <Instructions /> },
                             { path: 'support', element: <Support /> },
                             { path: 'statistics', element: <Statistics /> },
+                            { path: 'settings', element: <Settings /> },
                         ],
                     },
                 ],

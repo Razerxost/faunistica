@@ -1,5 +1,5 @@
 // src/hooks/useRecordStatus.ts
-import { useFormContext } from 'react-hook-form';
+
 import { useMemo } from 'react';
 import type { FormSchema } from '@/types/forms';
 import { BLOCKING_FIELDS, type BlockingFieldName } from '@/types/forms';
@@ -15,10 +15,9 @@ export function useRecordStatus(
     index: number,
     sample: Record<string, any>,
     validationErrors?: Map<number, string[]>,
+    sampleErrors?: Record<string, any>
 ): RecordStatus {
-    const { formState: { errors } } = useFormContext<FormSchema>();
 
-    const sampleErrors = errors.samples?.[index] as Record<string, any> | undefined;
 
     return useMemo(() => {
         // If mass-validation found errors for this record — always show error

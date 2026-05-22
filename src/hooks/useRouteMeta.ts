@@ -5,6 +5,7 @@ export interface RouteHandle {
     isLanding?: boolean;
     isNavigateEnabled?: boolean;
     isSidebarEnabled?: boolean;
+    isFullWidth?: boolean;
 }
 
 export const useRouteHandle = (): RouteHandle => {

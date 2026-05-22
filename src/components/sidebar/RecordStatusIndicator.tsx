@@ -4,7 +4,7 @@ import { CheckCircle2, AlertCircle, CircleDashed, Circle } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 import { useRecordStatus } from '@/hooks/useRecordStatus';
 import { BLOCKING_FIELDS, getFieldLabel } from '@/types/forms';
-import { useFormContext } from 'react-hook-form';
+import { useFormState } from 'react-hook-form';
 import type { FormSchema } from '@/types/forms';
 
 interface Props {
@@ -41,13 +41,12 @@ const STATUS_CONFIG = {
 } as const;
 
 export const RecordStatusIndicator: FC<Props> = ({ index, sample, validationErrors }) => {
-    const status = useRecordStatus(index, sample, validationErrors);
-    const { formState: { errors } } = useFormContext<FormSchema>();
+    const { errors } = useFormState({ name: `samples.${index}` as any });
+    const sampleErrors = errors.samples?.[index] as Record<string, any> | undefined;
+    const status = useRecordStatus(index, sample, validationErrors, sampleErrors);
     const config = STATUS_CONFIG[status];
 
-    // Для тултипа: какие именно поля не заполнены
     const externalErrors = validationErrors?.get(index);
-    const sampleErrors = errors.samples?.[index] as Record<string, any> | undefined;
 
     let missingFields: string[] = [];
     if (status === 'error') {
